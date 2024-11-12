@@ -10,7 +10,6 @@ import Conversation from '@/components/homepage/Conversation';
 import TweetReplyModal from '@/components/homepage/TweetReplyModal';
 
 export default function Home() {
-  console.log('author', process.env.NEXT_PUBLIC_THREAD_AUTHOR);
   const thread_author = process.env.NEXT_PUBLIC_THREAD_AUTHOR || 'skatedev';
   const thread_permlink = process.env.NEXT_PUBLIC_THREAD_PERMLINK || 're-skatedev-sidr6t';
 
@@ -32,16 +31,8 @@ export default function Home() {
         <Box flex="1" p={2} justifyContent="center">
           {!conversation ? (
             <Box
-              h="100vh" // Adjust height as needed
-              overflowY="auto" // Enable vertical scrolling
-              sx={{
-                '&::-webkit-scrollbar': {
-                  display: 'none',
-                },
-                '-ms-overflow-style': 'none',
-                scrollbarWidth: 'none',
-              }}
-              maxW={{ base: '100%', md: '720px' }}
+              h="100vh" 
+              overflowY="auto"
             >
               <TweetComposer pa={thread_author} pp={thread_permlink} onNewComment={handleNewComment} />
               <TweetList

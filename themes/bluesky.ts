@@ -1,7 +1,7 @@
 import { extendTheme } from '@chakra-ui/react';
 import { swiperStyles } from './swiperStyles';
 
-const blueSkyTheme = extendTheme({
+export const blueSkyTheme = extendTheme({
     colors: {
         background: '#87CEEB',
         text: '#1E90FF',
@@ -210,5 +210,3 @@ const blueSkyTheme = extendTheme({
         },
     },
 });
-
-export default blueSkyTheme;

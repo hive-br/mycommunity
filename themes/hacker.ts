@@ -1,18 +1,14 @@
 import { extendTheme } from '@chakra-ui/react';
+import { swiperStyles } from './swiperStyles';
 
-
-const hackerTheme = extendTheme({
-    config: {
-        usesHeader: true,
-        usesSidebar: false,
-    },
+export const hackerTheme = extendTheme({
     initialColorMode: 'dark', // set 'light' or 'dark' as the default color mode
     useSystemColorMode: false,
     colors: {
         background: '#0f0f0f', // Black background, typical of hacker aesthetics
         text: '#00FF00', // Bright green text, reminiscent of terminal output
         primary: '#00FF00', // Bright green for primary actions
-        secondary: '#6aa86a', // Dark gray for secondary elements
+        secondary: '#333333', // Dark gray for secondary elements
         accent: '#FFD700', // Gold for accentuating certain elements
         muted: '#1a1a1a', // Slightly lighter black for muted elements
         border: '#00FF00', // Green for borders to maintain the hacker vibe
@@ -208,4 +204,3 @@ const hackerTheme = extendTheme({
         },
     },
 });
-export default hackerTheme;

@@ -13,7 +13,7 @@ const poppins = Poppins({
     subsets: ['latin'],
 });
 
-const hiveBRTheme = extendTheme({
+export const hiveBRTheme = extendTheme({
     colors: {
         background: '#ffffff',  // Clean white background
         text: '#212121',  // Dark neutral text color
@@ -219,5 +219,3 @@ const hiveBRTheme = extendTheme({
         },
     },
 });
-
-export default hiveBRTheme;

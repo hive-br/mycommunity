@@ -11,16 +11,19 @@ interface PostsInfiniteScrollProps {
 }
 
 export default function PostsInfiniteScroll({ allPosts, fetchPosts, viewMode }: PostsInfiniteScrollProps) {
+    const hasMore = allPosts.length % 12 === 0; // Adjust this logic based on your pagination
+
     return (
         <InfiniteScroll
-            dataLength={allPosts.length} 
+            dataLength={allPosts.length}
             next={fetchPosts}
-            hasMore={true}
+            hasMore={hasMore}
             loader={
-                (<Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+                (<Box display="flex" justifyContent="center" alignItems="center" py={5}>
                     <Spinner size="xl" color="primary" />
                 </Box>
                 )}
+            scrollableTarget="scrollableDiv"
         >
             {allPosts && (<PostGrid posts={allPosts ?? []} columns={viewMode === 'grid' ? 3 : 1} />)}
         </InfiniteScroll>

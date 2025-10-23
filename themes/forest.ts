@@ -1,7 +1,7 @@
 import { extendTheme } from '@chakra-ui/react';
 import { swiperStyles } from './swiperStyles';
 
-export const forestTheme = extendTheme({
+const forestTheme = extendTheme({
     colors: {
         background: '#1C4532', // Forest green background
         text: '#F0FFF4', // Khaki text color
@@ -46,7 +46,7 @@ export const forestTheme = extendTheme({
         taller: '2',
     },
     borders: {
-        border: '1px solid #2E8B57', // Sea green border
+        tb1: '1px solid #2E8B57', // Sea green border
         borderRadius: '8px',
     },
     space: {
@@ -202,3 +202,4 @@ export const forestTheme = extendTheme({
         },
     },
 });
+export default forestTheme

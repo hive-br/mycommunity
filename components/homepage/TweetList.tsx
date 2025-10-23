@@ -1,20 +1,35 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import { Box, Spinner, VStack, Text } from '@chakra-ui/react';
-import { useComments } from '@/hooks/useComments';
 import Tweet from './Tweet';
-import { Comment } from '@hiveio/dhive';
+import { ExtendedComment, useComments } from '@/hooks/useComments';
+import { useSnaps } from '@/hooks/useSnaps';
+import TweetComposer from './TweetComposer';
 
 interface TweetListProps {
-  author: string;
-  permlink: string;
-  setConversation: (conversation: Comment) => void;
+  author: string
+  permlink: string
+  setConversation: (conversation: ExtendedComment) => void;
   onOpen: () => void;
-  setReply: (reply: Comment) => void;
-  newComment: Comment | null; // Add this prop
+  setReply: (reply: ExtendedComment) => void;
+  newComment: ExtendedComment | null;
   post?: boolean;
+  data: InfiniteScrollData
 }
 
-export default function TweetList({
+interface InfiniteScrollData {
+  comments: ExtendedComment[];
+  loadNextPage: () => void; // Default can be an empty function in usage
+  isLoading: boolean;
+  hasMore: boolean; // Default can be `false` in usage
+}
+
+function handleNewComment() {
+
+}
+
+export default function TweetList(
+{
   author,
   permlink,
   setConversation,
@@ -22,45 +37,19 @@ export default function TweetList({
   setReply,
   newComment,
   post = false,
+  data,
 }: TweetListProps) {
 
-  const { comments, isLoading, error } = useComments(author, permlink, post);
-  const [isFetchingMore, setIsFetchingMore] = useState(false); 
-  const listRef = useRef<HTMLDivElement>(null); 
-  const isFetching = useRef(false); 
+  const { comments, loadNextPage, isLoading, hasMore } = data
 
-  const fetchMoreTweets = async () => {
-    if (isFetching.current) return;
-    isFetching.current = true;
-    setIsFetchingMore(true);
+  comments.sort((a: ExtendedComment, b: ExtendedComment) => {
+    return new Date(b.created).getTime() - new Date(a.created).getTime();
+  });
+  // Handle new comment addition
+  //const updatedComments = newComment ? [newComment, ...comments] : comments;
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    isFetching.current = false;
-    setIsFetchingMore(false);
-  };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const container = listRef.current;
-      if (container) {
-        const { scrollTop, scrollHeight, clientHeight } = container;
-        const threshold = 400; // Trigger when 200px from the bottom
-
-        if (scrollTop + clientHeight >= scrollHeight - threshold && !isFetchingMore) {
-          fetchMoreTweets(); // Call function to load more tweets
-        }
-      }
-    };
-
-    const container = listRef.current;
-    if (container) {
-      container.addEventListener('scroll', handleScroll);
-      return () => container.removeEventListener('scroll', handleScroll);
-    }
-  }, [isFetchingMore]);
-
-  if (isLoading) {
+  if (isLoading && comments.length === 0) {
+    // Initial loading state
     return (
       <Box textAlign="center" mt={4}>
         <Spinner size="xl" />
@@ -69,43 +58,31 @@ export default function TweetList({
     );
   }
 
-  if (error) {
-    return (
-      <Box textAlign="center" mt={4}>
-        <Text color="red.500">Failed to load posts: {error}</Text>
-      </Box>
-    );
-  }
-
-  comments.sort((a: Comment, b: Comment) => {
-    return new Date(b.created).getTime() - new Date(a.created).getTime();
-  });
-
-  const updatedComments = newComment ? [newComment, ...comments] : comments;
-
   return (
-    <Box
-      ref={listRef} 
-      h="100vh"
-      pt={2}
-    >
-      <VStack spacing={2} align="stretch">
-        {updatedComments.map((comment: Comment) => (
-          <Tweet
-            key={comment.permlink}
-            comment={comment}
-            onOpen={onOpen}
-            setReply={setReply}
-            {...(!post ? { setConversation } : {})}
-          />
-        ))}
-      </VStack>
+        <InfiniteScroll
+            dataLength={comments.length}
+            next={loadNextPage}
+            hasMore={hasMore}
+            loader={
+                (<Box display="flex" justifyContent="center" alignItems="center" py={5}>
+                    <Spinner size="xl" color="primary" />
+                </Box>
+                )}
+            scrollableTarget="scrollableDiv"
+        >
+          <VStack spacing={1} align="stretch" mx="auto">
+          <TweetComposer pa={author} pp={permlink} onNewComment={handleNewComment} onClose={() => null} />
+          {comments.map((comment: ExtendedComment) => (
+            <Tweet
+              key={comment.permlink}
+              comment={comment}
+              onOpen={onOpen}
+              setReply={setReply}
+              {...(!post ? { setConversation } : {})}
+            />
+          ))}
+          </VStack>
+      </InfiniteScroll>
 
-      {isFetchingMore && (
-        <Box display="flex" justifyContent="center" alignItems="center" mt={4}>
-          <Spinner size="lg" />
-        </Box>
-      )}
-    </Box>
   );
 }

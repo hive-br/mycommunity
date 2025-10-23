@@ -15,8 +15,8 @@ export default function Blog() {
     const tag = process.env.NEXT_PUBLIC_HIVE_SEARCH_TAG
 
     const params = useRef([
-        { 
-            tag: tag, 
+        {
+            tag: tag,
             limit: 12,
             start_author: '',
             start_permlink: '',
@@ -28,16 +28,19 @@ export default function Blog() {
         isFetching.current = true;
         try {
             const posts = await findPosts(query, params.current);
-            setAllPosts(prevPosts => [...prevPosts, ...posts]);
-            params.current = [{
-                    tag: tag, 
+            if (posts.length > 0) {
+                setAllPosts(prevPosts => [...prevPosts, ...posts]);
+                params.current = [{
+                    tag: tag,
                     limit: 12,
                     start_author: posts[posts.length - 1].author,
                     start_permlink: posts[posts.length - 1].permlink,
                 }];
-            isFetching.current = false; 
+            }
+            isFetching.current = false;
         } catch (error) {
             console.log(error);
+            isFetching.current = false;
         }
     }
 
@@ -53,7 +56,19 @@ export default function Blog() {
     }, [query]);
 
     return (
-        <Container maxW="container.lg" mt="3">
+        <Container
+            id="scrollableDiv"
+            maxW="container.lg"
+            mt="3"
+            h="100vh"
+            overflowY="auto"
+            sx={{
+                '&::-webkit-scrollbar': {
+                    display: 'none',
+                },
+                scrollbarWidth: 'none',
+            }}
+        >
             <TopBar viewMode={viewMode} setViewMode={setViewMode} setQuery={setQuery} />
             <PostInfiniteScroll allPosts={allPosts} fetchPosts={fetchPosts} viewMode={viewMode} />
         </Container>

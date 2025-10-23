@@ -87,7 +87,7 @@ export default function PostCard({ post }: PostCardProps) {
                         <Text fontWeight="medium" fontSize="sm">
                             <Link href={`/@${author}`}>@{author}</Link>
                         </Text>
-                        <Text fontSize="sm" color="secondary">
+                        <Text fontSize="sm" color="primary">
                             {postDate}
                         </Text>
                     </Box>

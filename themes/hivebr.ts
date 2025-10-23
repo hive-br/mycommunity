@@ -15,12 +15,12 @@ const poppins = Poppins({
 
 export const hiveBRTheme = extendTheme({
     colors: {
-        background: '#ffffff',  // Clean white background
+        background: 'linear-gradient(45deg, #dbf5d0, #f7f7f7)',  // Clean white background
         text: '#212121',  // Dark neutral text color
         primary: '#0033a0',  // Brazil flag blue for primary elements
         secondary: '#ffcc29',  // Brazil flag yellow for attention elements
         accent: '#00a859',  // Brazil flag green for subtle accents
-        muted: '#e6e6e6',  // Light gray for muted elements or backgrounds
+        muted: '#dadfeb',  // Light gray for muted elements or backgrounds
         border: '#e0e0e0',  // Light gray border for cards or sections
         error: '#d32f2f',  // Red for errors
         success: '#66bb6a',  // Green for success messages

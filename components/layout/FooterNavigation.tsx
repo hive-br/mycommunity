@@ -1,7 +1,7 @@
 import { useAioha } from '@aioha/react-ui';
-import { Box, HStack, Button, Link, Icon } from '@chakra-ui/react';
+import { Box, Button, HStack, Icon, Tooltip } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
-import { FiBell, FiBook, FiHome, FiUser } from 'react-icons/fi';
+import { FiBell, FiBook, FiCreditCard, FiHome, FiUser } from 'react-icons/fi';
 
 export default function FooterNavigation() {
 
@@ -22,38 +22,52 @@ export default function FooterNavigation() {
             right="0"
             bg="secondary"
             p={2}
-            border="tb1"
+            borderTop="1px solid"
+            borderColor="tb1"
             display={{ base: 'block', md: 'none' }}
+            zIndex="999"
         >
             <HStack justify="space-around">
-            <Button
-                    onClick={() => handleNavigation("/")}
-                    variant="ghost"
-                    leftIcon={<Icon as={FiHome} boxSize={4} />}
-                >
-                    Home
-                </Button>
-                <Button
-                    onClick={() => handleNavigation("/blog")}
-                    variant="ghost"
-                    leftIcon={<Icon as={FiBook} boxSize={4} />}
-                >
-                    Blog
-                </Button>
-                <Button
-                    onClick={() => handleNavigation("/@" + user + "/notifications")}
-                    variant="ghost"
-                    leftIcon={<Icon as={FiBell} boxSize={4} />}
-                >
-                    Notifications
-                </Button>
-                <Button
-                    onClick={() => handleNavigation("/@" + user)}
-                    variant="ghost"
-                    leftIcon={<Icon as={FiUser} boxSize={4} />}
-                >
-                    Profile
-                </Button>
+                <Tooltip label="Home" aria-label="Home tooltip">
+                    <Button
+                        onClick={() => handleNavigation("/")}
+                        variant="ghost"
+                        leftIcon={<Icon as={FiHome} boxSize={4} />}
+                    />
+                </Tooltip>
+
+                <Tooltip label="Wallet" aria-label="Wallet tooltip">
+                    <Button
+                        onClick={() => handleNavigation("/@" + user + '/wallet')}
+                        variant="ghost"
+                        leftIcon={<Icon as={FiCreditCard} boxSize={5} />}
+                        _hover={{ bg: "muted" }}
+                    />
+                </Tooltip>
+
+                <Tooltip label="Blog" aria-label="Blog tooltip">
+                    <Button
+                        onClick={() => handleNavigation("/blog")}
+                        variant="ghost"
+                        leftIcon={<Icon as={FiBook} boxSize={4} />}
+                    />
+                </Tooltip>
+
+                <Tooltip label="Notifications" aria-label="Notifications tooltip">
+                    <Button
+                        onClick={() => handleNavigation("/@" + user + "/notifications")}
+                        variant="ghost"
+                        leftIcon={<Icon as={FiBell} boxSize={4} />}
+                    />
+                </Tooltip>
+
+                <Tooltip label="Profile" aria-label="Profile tooltip">
+                    <Button
+                        onClick={() => handleNavigation("/@" + user)}
+                        variant="ghost"
+                        leftIcon={<Icon as={FiUser} boxSize={4} />}
+                    />
+                </Tooltip>
             </HStack>
         </Box>
     );

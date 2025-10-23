@@ -8,16 +8,17 @@ import { CloseIcon } from '@chakra-ui/icons';
 import { FaImage } from 'react-icons/fa';
 import { MdGif } from 'react-icons/md';
 import { Comment } from '@hiveio/dhive';
-import { getFileSignature, uploadImage } from '@/lib/hive/client-functions';
+import { getFileSignature, getLastSnapsContainer, uploadImage } from '@/lib/hive/client-functions';
 
 interface TweetComposerProps {
     pa: string;
     pp: string;
     onNewComment: (newComment: Partial<Comment>) => void;
     post?: boolean;
+    onClose: () => void;
 }
 
-export default function TweetComposer ({ pa, pp, onNewComment, post = false }: TweetComposerProps) {
+export default function TweetComposer ({ pa, pp, onNewComment, post = false, onClose }: TweetComposerProps) {
     const { user, aioha } = useAioha();
     const postBodyRef = useRef<HTMLTextAreaElement>(null);
     const [images, setImages] = useState<File[]>([]);
@@ -26,10 +27,16 @@ export default function TweetComposer ({ pa, pp, onNewComment, post = false }: T
     const [isLoading, setIsLoading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState<number[]>([]);
 
-    const buttonText = (post ? "Reply" : "Post")
+    const buttonText = post ? "Reply" : "Post";
+
+    // Function to extract hashtags from text
+    function extractHashtags(text: string): string[] {
+        const hashtagRegex = /#(\w+)/g;
+        const matches = text.match(hashtagRegex) || [];
+        return matches.map(hashtag => hashtag.slice(1)); // Remove the '#' symbol
+    }
 
     async function handleComment() {
-
         let commentBody = postBodyRef.current?.value || '';
 
         if (!commentBody.trim() && images.length === 0 && !selectedGif) {
@@ -45,6 +52,7 @@ export default function TweetComposer ({ pa, pp, onNewComment, post = false }: T
             .replace(/[^a-zA-Z0-9]/g, "")
             .toLowerCase();
 
+        let validUrls: string[] = [];    
         if (images.length > 0) {
             const uploadedImages = await Promise.all(images.map(async (image, index) => {
                 const signature = await getFileSignature(image);
@@ -57,7 +65,7 @@ export default function TweetComposer ({ pa, pp, onNewComment, post = false }: T
                 }
             }));
 
-            const validUrls = uploadedImages.filter(Boolean);
+            validUrls = uploadedImages.filter((url): url is string => url !== null);
 
             if (validUrls.length > 0) {
                 const imageMarkup = validUrls.map((url: string | null) => `![image](${url?.toString() || ''})`).join('\n');
@@ -70,25 +78,45 @@ export default function TweetComposer ({ pa, pp, onNewComment, post = false }: T
         }
 
         if (commentBody) {
+            let snapsTags: string[] = [];
             try {
-                const commentResponse = await aioha.comment(pa, pp, permlink, '', commentBody, { app: 'mycommunity' });
+                // Add existing `snaps` tag logic
+                if (pp === "snaps") { 
+                    pp = (await getLastSnapsContainer()).permlink;
+                    snapsTags = [process.env.NEXT_PUBLIC_HIVE_COMMUNITY_TAG || "", "snaps"];
+                }
+
+                // Extract hashtags from the comment body and add to `snapsTags`
+                const hashtags = extractHashtags(commentBody);
+                snapsTags = [...new Set([...snapsTags, ...hashtags])]; // Add hashtags without duplicates
+
+                const commentResponse = await aioha.comment(pa, pp, permlink, '', commentBody, { app: 'mycommunity', tags: snapsTags, images: validUrls });
                 if (commentResponse.success) {
                     postBodyRef.current!.value = '';
                     setImages([]);
                     setSelectedGif(null);
 
                     const newComment: Partial<Comment> = {
-                        author: user, // Assuming `pa` is the current user's author name
+                        author: user, 
                         permlink: permlink,
                         body: commentBody,
                     };
 
-                    onNewComment(newComment); // Pass the actual Comment data
+                    onNewComment(newComment); 
+                    onClose();
+                    
                 }
             } finally {
                 setIsLoading(false);
                 setUploadProgress([]);
             }
+        }
+    }
+
+    // Detect Ctrl+Enter and submit
+    function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+        if (event.ctrlKey && event.key === 'Enter') {
+            handleComment();
         }
     }
 
@@ -103,6 +131,7 @@ export default function TweetComposer ({ pa, pp, onNewComment, post = false }: T
                 ref={postBodyRef}
                 _placeholder={{ color: 'text' }}
                 isDisabled={isLoading}
+                onKeyDown={handleKeyDown} // Attach the keydown handler
             />
             <HStack justify="space-between" mb={3}>
                 <HStack>
@@ -163,5 +192,4 @@ export default function TweetComposer ({ pa, pp, onNewComment, post = false }: T
             )}
         </Box>
     );
-};
-
+}

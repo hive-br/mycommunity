@@ -15,7 +15,7 @@ const roboto = Roboto({
 
 export const cannabisTheme = extendTheme({
     colors: {
-        background: '#ffffff',  // Clean white background
+        background: 'linear-gradient(45deg, #abdb86, #f7f7f7)',  // Clean white background
         text: '#212121',  // Dark neutral text color
         primary: '#4caf50',  // Leaf green for primary elements
         secondary: '#2e7d32',  // Darker green for secondary actions

@@ -10,6 +10,7 @@ import Conversation from '../homepage/Conversation';
 import TweetReplyModal from '../homepage/TweetReplyModal';
 import { getPost } from '@/lib/hive/client-functions';
 import PostDetails from '@/components/blog/PostDetails';
+import { useComments } from '@/hooks/useComments';
 
 interface PostPageProps {
   author: string
@@ -25,6 +26,13 @@ export default function PostPage({ author, permlink }: PostPageProps) {
   const [reply, setReply] = useState<Comment>();
   const [isOpen, setIsOpen] = useState(false);
   const [newComment, setNewComment] = useState<Comment | null>(null); // Define the state
+
+  const data = useComments(author, permlink, true);
+  const commentsData = {
+    ...data, 
+    loadNextPage: () => {}, 
+    hasMore: false,         
+  };
 
   useEffect(() => {
     async function loadPost() {
@@ -74,6 +82,7 @@ export default function PostPage({ author, permlink }: PostPageProps) {
                   setReply={setReply}
                   newComment={newComment} // Pass the newComment to TweetList
                   post={true}
+                  data={commentsData}
                 />
               </>
             ) : (

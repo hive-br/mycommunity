@@ -1,17 +1,18 @@
 'use client';
 
-import { Box, Container, Flex } from '@chakra-ui/react';
+import { Container, Flex } from '@chakra-ui/react';
 import TweetList from '@/components/homepage/TweetList';
-import TweetComposer from '@/components/homepage/TweetComposer';
 import RightSidebar from '@/components/layout/RightSideBar';
 import { useState } from 'react';
 import { Comment } from '@hiveio/dhive'; // Ensure this import is consistent
 import Conversation from '@/components/homepage/Conversation';
 import TweetReplyModal from '@/components/homepage/TweetReplyModal';
+import { useSnaps } from '@/hooks/useSnaps';
 
 export default function Home() {
-  const thread_author = process.env.NEXT_PUBLIC_THREAD_AUTHOR || 'skatedev';
-  const thread_permlink = process.env.NEXT_PUBLIC_THREAD_PERMLINK || 're-skatedev-sidr6t';
+  //console.log('author', process.env.NEXT_PUBLIC_THREAD_AUTHOR);
+  const thread_author = 'peak.snaps';
+  const thread_permlink = 'snaps';
 
   const [conversation, setConversation] = useState<Comment | undefined>();
   const [reply, setReply] = useState<Comment>();
@@ -25,32 +26,47 @@ export default function Home() {
     setNewComment(newComment as Comment);
   };
 
+  const snaps = useSnaps();
+
   return (
-    <Box bg="background" color="text" minH="100vh">
-      <Flex direction={{ base: 'column', md: 'row' }}>
-        <Box flex="1" p={2} justifyContent="center">
-          {!conversation ? (
-            <Box
-              h="100vh" 
-              overflowY="auto"
-            >
-              <TweetComposer pa={thread_author} pp={thread_permlink} onNewComment={handleNewComment} />
-              <TweetList
-                author={thread_author}
-                permlink={thread_permlink}
-                setConversation={setConversation}
-                onOpen={onOpen}
-                setReply={setReply}
-                newComment={newComment} 
-              />
-            </Box>
-          ) : (
-            <Conversation comment={conversation} setConversation={setConversation} onOpen={onOpen} setReply={setReply} />
-          )}
-        </Box>
-        <RightSidebar />
-      </Flex>
+    <Flex direction={{ base: 'column', md: 'row' }}>
+      <Container
+        maxW={{ base: '100%', md: '720px' }}
+        h="100vh"
+        overflowY="auto"
+        pr={2}
+        pt={2}
+        position={"sticky"}
+        top={0}
+        justifyContent="center"
+        flex="1"
+        sx={
+          {
+            '&::-webkit-scrollbar': {
+              display: 'none',
+            },
+            scrollbarWidth: 'none',
+          }
+        }
+        id='scrollableDiv'>
+        {!conversation ? (
+
+
+          <TweetList
+            author={thread_author}
+            permlink={thread_permlink}
+            setConversation={setConversation}
+            onOpen={onOpen}
+            setReply={setReply}
+            newComment={newComment}
+            data={snaps}
+          />
+        ) : (
+          <Conversation comment={conversation} setConversation={setConversation} onOpen={onOpen} setReply={setReply} />
+        )}
+      </Container>
+      <RightSidebar />
       {isOpen && <TweetReplyModal isOpen={isOpen} onClose={onClose} comment={reply} onNewReply={handleNewComment} />}
-    </Box>
+    </Flex>
   );
 }

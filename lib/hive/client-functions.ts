@@ -3,9 +3,11 @@ import { Broadcast, Custom, KeychainKeyTypes, KeychainRequestResponse, KeychainS
 import HiveClient from "./hiveclient";
 import crypto from 'crypto';
 import { signImageHash } from "./server-functions";
-import { Discussion, Notifications } from "@hiveio/dhive";
+import { Account, Discussion, Notifications, PublicKey, PrivateKey, KeyRole } from "@hiveio/dhive";
 import { extractNumber } from "../utils/extractNumber";
 import { profileEnd } from "console";
+import { convertSelectionToNode$ } from "@mdxeditor/editor";
+import { ExtendedComment } from "@/hooks/useComments";
 
 interface HiveKeychainResponse {
   success: boolean
@@ -195,6 +197,19 @@ export async function checkFollow(follower: string, following: string): Promise<
   }
 }
 
+export async function checkAccountName(username: string) {
+  try {
+    const users = await HiveClient.call('condenser_api', 'lookup_accounts', [
+      username, 1
+    ]);
+    console.log(users[0])
+    return users[0]
+  } catch (error) {
+    console.log(error)
+    //return false
+  }
+}
+
 export async function changeFollow(follower: string, following: string) {
   const keychain = new KeychainSDK(window);
   const status = await checkFollow(follower, following)
@@ -259,7 +274,7 @@ export function getFileSignature (file: File): Promise<string> {
               const content = Buffer.from(reader.result as ArrayBuffer);
               const hash = crypto.createHash('sha256')
                   .update('ImageSigningChallenge')
-                  .update(content)
+                  .update(content as any)
                   .digest('hex');
               try {
                   const signature = await signImageHash(hash);
@@ -426,6 +441,17 @@ export async function findPosts(query: string, params: any[]) {
   return posts
 }
 
+export async function getLastSnapsContainer() {
+  const author = "peak.snaps";   
+  const beforeDate = new Date().toISOString().split('.')[0];
+  const permlink = '';
+  const limit = 1;
 
+  const result = await HiveClient.database.call('get_discussions_by_author_before_date',
+      [author, permlink, beforeDate, limit]);
 
-
+  return {
+      author,
+      permlink: result[0].permlink
+  }
+}

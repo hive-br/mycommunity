@@ -6,6 +6,7 @@ import { useAioha } from '@aioha/react-ui';
 import { useState } from 'react';
 import { getPayoutValue } from '@/lib/hive/client-functions';
 import markdownRenderer from '@/lib/utils/MarkdownRenderer';
+import { getPostDate } from '@/lib/utils/GetPostDate';
 
 interface TweetProps {
     comment: ExtendedComment;
@@ -16,6 +17,7 @@ interface TweetProps {
 }
 
 const Tweet = ({ comment, onOpen, setReply, setConversation, level = 0 }: TweetProps) => {
+    const commentDate = getPostDate(comment.created);
     const { aioha, user } = useAioha();
     const [voted, setVoted] = useState(comment.active_votes?.some(item => item.voter === user))
     const [sliderValue, setSliderValue] = useState(5);
@@ -54,9 +56,14 @@ const Tweet = ({ comment, onOpen, setReply, setConversation, level = 0 }: TweetP
             >
                 <HStack mb={2}>
                     <Avatar size="sm" name={comment.author} src={`https://images.hive.blog/u/${comment.author}/avatar/sm`} />
-                    <Link href={`/@${comment.author}`} fontWeight="bold" mb={2}>
-                        {comment.author}
-                    </Link>
+                    <Box ml={3}>
+                        <Text fontWeight="medium" fontSize="sm">
+                            <Link href={`/@${comment.author}`}>@{comment.author}</Link>
+                        </Text>
+                        <Text fontWeight="medium" fontSize="sm" color="primary">
+                            {commentDate}
+                        </Text>
+                    </Box>
                 </HStack>
                 <Box dangerouslySetInnerHTML={{ __html: markdownRenderer(comment.body) }} />
                 {showSlider ? (

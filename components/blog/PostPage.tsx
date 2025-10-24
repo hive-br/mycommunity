@@ -73,7 +73,7 @@ export default function PostPage({ author, permlink }: PostPageProps) {
             <PostDetails post={post} />
             {!conversation ? (
               <>
-                <TweetComposer pa={author} pp={permlink} onNewComment={handleNewComment} post={true} />
+                <TweetComposer pa={author} pp={permlink} onNewComment={handleNewComment} post={true} onClose={() => {}} />
                 <TweetList
                   author={author}
                   permlink={permlink}

@@ -2,10 +2,11 @@
 'use client'
 
 import { ChakraProvider } from '@chakra-ui/react'
-import { forestTheme } from '@/themes/forest'
+
 import { blueSkyTheme } from '@/themes/bluesky'
 import { hackerTheme } from '@/themes/hacker'
 import { nounsDaoTheme } from '@/themes/nounish'
+import { forestTheme } from '@/themes/forest'
 
 
 import { Aioha } from '@aioha/aioha'

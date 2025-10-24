@@ -202,4 +202,5 @@ const forestTheme = extendTheme({
         },
     },
 });
-export default forestTheme
+
+export { forestTheme };

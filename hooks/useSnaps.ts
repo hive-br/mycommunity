@@ -1,5 +1,6 @@
+//useSnaps.ts
 import HiveClient from '@/lib/hive/hiveclient';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ExtendedComment } from './useComments';
 
 interface lastContainerInfo {
@@ -20,7 +21,7 @@ export const useSnaps = () => {
   
 
   // Filter comments by the target tag
-  function filterCommentsByTag(comments: ExtendedComment[], targetTag: string): ExtendedComment[] {
+  const filterCommentsByTag = useCallback((comments: ExtendedComment[], targetTag: string): ExtendedComment[] => {
     return comments.filter((commentItem) => {
       try {
         if (!commentItem.json_metadata) {
@@ -34,20 +35,24 @@ export const useSnaps = () => {
         return false; // Exclude comments with invalid JSON
       }
     });
-  }
+  }, []);
+
+  // Cache for storing filtered comments
+  const commentsCache = useRef<Map<string, ExtendedComment[]>>(new Map());
+
   // Fetch comments with a minimum size
-  async function getMoreSnaps(): Promise<ExtendedComment[]> {
+  const getMoreSnaps = useCallback(async (): Promise<ExtendedComment[]> => {
     const tag = process.env.NEXT_PUBLIC_HIVE_COMMUNITY_TAG || ''
     const author = "peak.snaps";
-    const limit = 3;
+    const limit = 10; // Increased batch size
     const allFilteredComments: ExtendedComment[] = [];
 
-    let hasMoreData = true; // To track if there are more containers to fetch
+    let hasMoreData = true;
     let permlink = lastContainerRef.current?.permlink || "";
     let date = lastContainerRef.current?.date || new Date().toISOString();
 
     while (allFilteredComments.length < pageMinSize && hasMoreData) {
-
+      // Get discussions in larger batches
       const result = await HiveClient.database.call('get_discussions_by_author_before_date', [
         author,
         permlink,
@@ -60,21 +65,52 @@ export const useSnaps = () => {
         break;
       }
 
-      for (const resultItem of result) {
+      // Prepare parallel requests for content replies
+      const replyPromises = result.map(async (resultItem: any) => {
+        // Check cache first
+        const cacheKey = `${author}-${resultItem.permlink}`;
+        if (commentsCache.current.has(cacheKey)) {
+          return {
+            comments: commentsCache.current.get(cacheKey)!,
+            permlink: resultItem.permlink,
+            date: resultItem.created
+          };
+        }
+
+        // If not in cache, fetch from blockchain
         const comments = (await HiveClient.database.call("get_content_replies", [
           author,
           resultItem.permlink,
         ])) as ExtendedComment[];
 
         const filteredComments = filterCommentsByTag(comments, tag);
-        allFilteredComments.push(...filteredComments);
+        
+        // Store in cache
+        commentsCache.current.set(cacheKey, filteredComments);
 
-        // Add permlink to the fetched set
-        fetchedPermlinksRef.current.add(resultItem.permlink);
+        return {
+          comments: filteredComments,
+          permlink: resultItem.permlink,
+          date: resultItem.created
+        };
+      });
 
-        // Update the last container info for the next fetch
-        permlink = resultItem.permlink;
-        date = resultItem.created;
+      // Execute all requests in parallel
+      const replies = await Promise.all(replyPromises);
+
+      // Process results
+      for (const reply of replies) {
+        if (!fetchedPermlinksRef.current.has(reply.permlink)) {
+          allFilteredComments.push(...reply.comments);
+          fetchedPermlinksRef.current.add(reply.permlink);
+          permlink = reply.permlink;
+          date = reply.date;
+        }
+      }
+
+      // Break early if we have enough comments
+      if (allFilteredComments.length >= pageMinSize * 2) {
+        break;
       }
     }
 
@@ -82,7 +118,7 @@ export const useSnaps = () => {
     lastContainerRef.current = { permlink, date };
 
     return allFilteredComments;
-  }
+  }, [filterCommentsByTag]);
 
   // Fetch posts when `currentPage` changes
   useEffect(() => {
@@ -109,7 +145,7 @@ export const useSnaps = () => {
     };
 
     fetchPosts();
-  }, [currentPage]);
+  }, [currentPage, getMoreSnaps]);
 
   // Load the next page
   const loadNextPage = () => {

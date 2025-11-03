@@ -57,9 +57,13 @@ export default function WalletPage({ username }: WalletPageProps) {
   const [modalContent, setModalContent] = useState<{ title: string, description?: string, showMemoField?: boolean, showUsernameField?: boolean } | null>(null);
   const [hivePower, setHivePower] = useState<string | undefined>(undefined);
 
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.700');
-  const hoverBg = useColorModeValue('gray.50', 'gray.700');
+  // Use theme colors directly - no useColorModeValue needed
+  const cardBg = 'muted';
+  const borderColor = 'border';
+  const hoverBg = 'secondary';
+  const textMuted = 'gray.400';
+  const successColor = 'success';
+  const accentColor = 'accent';
 
   useEffect(() => {
     if (hiveAccount?.json_metadata) {
@@ -324,7 +328,7 @@ export default function WalletPage({ username }: WalletPageProps) {
         </Flex>
 
         <Box zIndex={2} position="relative">
-          <Badge colorScheme="green" fontSize="md" px={3} py={1}>
+          <Badge bg="success" color="background" fontSize="md" px={3} py={1}>
             Wallet
           </Badge>
         </Box>
@@ -337,8 +341,8 @@ export default function WalletPage({ username }: WalletPageProps) {
           <Box bg={cardBg} p={6} borderRadius="lg" border="1px" borderColor={borderColor} boxShadow="lg" mb={6}>
             <Flex justifyContent="space-between" alignItems="center">
               <Box>
-                <Text fontSize="sm" color="gray.500" mb={1}>Estimated Account Value</Text>
-                <Heading size="xl" color="green.500">
+                <Text fontSize="sm" color={textMuted} mb={1}>Estimated Account Value</Text>
+                <Heading size="xl" color={successColor}>
                   ${(
                     (parseFloat(balance) * prices.hive) +
                     (parseFloat(hbdBalance) * prices.hbd) +
@@ -349,10 +353,10 @@ export default function WalletPage({ username }: WalletPageProps) {
                 </Heading>
               </Box>
               <VStack align="flex-end" spacing={1}>
-                <Text fontSize="xs" color="gray.500">
+                <Text fontSize="xs" color={textMuted}>
                   HIVE: ${prices.hive.toFixed(3)}
                 </Text>
-                <Text fontSize="xs" color="gray.500">
+                <Text fontSize="xs" color={textMuted}>
                   HBD: ${prices.hbd.toFixed(3)}
                 </Text>
               </VStack>
@@ -364,9 +368,9 @@ export default function WalletPage({ username }: WalletPageProps) {
         <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={4} mb={8}>
           <Box bg={cardBg} p={6} borderRadius="lg" border="1px" borderColor={borderColor} boxShadow="md">
             <Stat>
-              <StatLabel fontSize="sm" color="gray.500">Total HIVE</StatLabel>
+              <StatLabel fontSize="sm" color={textMuted}>Total HIVE</StatLabel>
               <StatNumber fontSize="2xl" color="primary">{balance}</StatNumber>
-              <StatHelpText>
+              <StatHelpText color={textMuted}>
                 <Icon as={FaCoins} mr={1} />
                 {prices ? `≈ $${(parseFloat(balance) * prices.hive).toFixed(2)}` : 'Liquid Balance'}
               </StatHelpText>
@@ -375,9 +379,9 @@ export default function WalletPage({ username }: WalletPageProps) {
 
           <Box bg={cardBg} p={6} borderRadius="lg" border="1px" borderColor={borderColor} boxShadow="md">
             <Stat>
-              <StatLabel fontSize="sm" color="gray.500">Hive Power</StatLabel>
-              <StatNumber fontSize="2xl" color="purple.500">{hivePower || "..."}</StatNumber>
-              <StatHelpText>
+              <StatLabel fontSize="sm" color={textMuted}>Hive Power</StatLabel>
+              <StatNumber fontSize="2xl" color={accentColor}>{hivePower || "..."}</StatNumber>
+              <StatHelpText color={textMuted}>
                 <Icon as={FaChartLine} mr={1} />
                 {prices && hivePower ? `≈ $${(parseFloat(hivePower) * prices.hive).toFixed(2)}` : 'Staked Power'}
               </StatHelpText>
@@ -386,9 +390,9 @@ export default function WalletPage({ username }: WalletPageProps) {
 
           <Box bg={cardBg} p={6} borderRadius="lg" border="1px" borderColor={borderColor} boxShadow="md">
             <Stat>
-              <StatLabel fontSize="sm" color="gray.500">HBD Balance</StatLabel>
-              <StatNumber fontSize="2xl" color="green.500">{hbdBalance}</StatNumber>
-              <StatHelpText>
+              <StatLabel fontSize="sm" color={textMuted}>HBD Balance</StatLabel>
+              <StatNumber fontSize="2xl" color={successColor}>{hbdBalance}</StatNumber>
+              <StatHelpText color={textMuted}>
                 <Icon as={FaDollarSign} mr={1} />
                 {prices ? `≈ $${(parseFloat(hbdBalance) * prices.hbd).toFixed(2)}` : 'Stable Coin'}
               </StatHelpText>
@@ -405,7 +409,7 @@ export default function WalletPage({ username }: WalletPageProps) {
                 <Icon as={FaCoins} w={6} h={6} color="primary" mr={3} />
                 <Box>
                   <Heading size="md">HIVE</Heading>
-                  <Text fontSize="sm" color="gray.500">Liquid balance</Text>
+                  <Text fontSize="sm" color={textMuted}>Liquid balance</Text>
                 </Box>
               </Flex>
               <Text fontSize="2xl" fontWeight="bold">{balance}</Text>
@@ -466,10 +470,10 @@ export default function WalletPage({ username }: WalletPageProps) {
           <Box bg={cardBg} p={6} borderRadius="lg" border="1px" borderColor={borderColor} boxShadow="md">
             <Flex justifyContent="space-between" alignItems="center" mb={4}>
               <Flex alignItems="center">
-                <Icon as={FaChartLine} w={6} h={6} color="purple.500" mr={3} />
+                <Icon as={FaChartLine} w={6} h={6} color={accentColor} mr={3} />
                 <Box>
                   <Heading size="md">Hive Power</Heading>
-                  <Text fontSize="sm" color="gray.500">Staked HIVE for voting power</Text>
+                  <Text fontSize="sm" color={textMuted}>Staked HIVE for voting power</Text>
                 </Box>
               </Flex>
               <Text fontSize="2xl" fontWeight="bold">{hivePower || "Loading..."}</Text>
@@ -503,10 +507,10 @@ export default function WalletPage({ username }: WalletPageProps) {
           <Box bg={cardBg} p={6} borderRadius="lg" border="1px" borderColor={borderColor} boxShadow="md">
             <Flex justifyContent="space-between" alignItems="center" mb={4}>
               <Flex alignItems="center">
-                <Icon as={FaDollarSign} w={6} h={6} color="green.500" mr={3} />
+                <Icon as={FaDollarSign} w={6} h={6} color={successColor} mr={3} />
                 <Box>
                   <Heading size="md">HBD (Hive Backed Dollar)</Heading>
-                  <Text fontSize="sm" color="gray.500">Stable coin pegged to USD</Text>
+                  <Text fontSize="sm" color={textMuted}>Stable coin pegged to USD</Text>
                 </Box>
               </Flex>
               <Text fontSize="2xl" fontWeight="bold">{hbdBalance}</Text>
@@ -539,13 +543,13 @@ export default function WalletPage({ username }: WalletPageProps) {
           {/* Savings Section */}
           <Box bg={cardBg} p={6} borderRadius="lg" border="1px" borderColor={borderColor} boxShadow="md">
             <Flex alignItems="center" mb={4}>
-              <Icon as={FaPiggyBank} w={6} h={6} color="teal.500" mr={3} />
+              <Icon as={FaPiggyBank} w={6} h={6} color="accent" mr={3} />
               <Heading size="md">Savings</Heading>
             </Flex>
             
             <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={4}>
               <Box p={4} bg={hoverBg} borderRadius="md">
-                <Text fontSize="sm" color="gray.500" mb={1}>HIVE Savings</Text>
+                <Text fontSize="sm" color={textMuted} mb={1}>HIVE Savings</Text>
                 <Text fontSize="xl" fontWeight="bold">{savingsBalance}</Text>
                 {isOwnWallet && (
                   <Button
@@ -562,7 +566,7 @@ export default function WalletPage({ username }: WalletPageProps) {
               </Box>
 
               <Box p={4} bg={hoverBg} borderRadius="md">
-                <Text fontSize="sm" color="gray.500" mb={1}>HBD Savings</Text>
+                <Text fontSize="sm" color={textMuted} mb={1}>HBD Savings</Text>
                 <Text fontSize="xl" fontWeight="bold">{hbdSavingsBalance}</Text>
                 {isOwnWallet && (
                   <Button

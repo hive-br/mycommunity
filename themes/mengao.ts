@@ -1,26 +1,20 @@
 import { extendTheme } from '@chakra-ui/react';
 import { swiperStyles } from './swiperStyles';
 
-export const hiveBRTheme = extendTheme({
+export const mengaoTheme = extendTheme({
     initialColorMode: 'dark',
     useSystemColorMode: false,
     colors: {
-        background: '#001a33',  // Deep ocean blue (dark Brazilian night sky/ocean)
-        text: '#FFFFFF',  // White text for contrast
-        primary: '#FFDF00',  // Brazilian yellow (bright and bold)
-        secondary: '#009739',  // Brazilian green (for secondary actions)
-        accent: '#0099CC',  // Tropical cyan/turquoise (Brazilian beach water)
-        muted: '#003d5c',  // Lighter ocean blue for cards
-        border: '#009739',  // Brazilian green border
-        error: '#ff4444',  // Bright red for errors
-        success: '#00CC66',  // Bright green for success
-        warning: '#FFA500',  // Orange for warnings
-    },
-    semanticTokens: {
-        colors: {
-            'chakra-body-bg': { default: 'background' },
-            'chakra-body-text': { default: 'text' },
-        },
+        background: '#0a0a0a', // Near black background
+        text: '#FFFFFF', // White text
+        primary: '#E31937', // Flamengo red
+        secondary: '#000000', // Flamengo black
+        accent: '#FFD700', // Gold accent
+        muted: '#1a0a0a', // Dark red-tinted muted
+        border: '#E31937', // Flamengo red border
+        error: '#ff4444', // Bright red for errors
+        success: '#FFD700', // Gold for success
+        warning: '#ff8800', // Orange for warnings
     },
     fonts: {
         heading: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
@@ -41,7 +35,7 @@ export const hiveBRTheme = extendTheme({
     },
     fontWeights: {
         normal: 400,
-        medium: 500,
+        medium: 600,
         bold: 700,
     },
     lineHeights: {
@@ -54,8 +48,8 @@ export const hiveBRTheme = extendTheme({
         taller: '2',
     },
     borders: {
-        tb1: '2px solid #009739',  // Brazilian green border (thicker for visibility)
-        borderRadius: '8px',
+        tb1: '1px solid #E31937', // Flamengo red border
+        borderRadius: '4px',
     },
     space: {
         px: '1px',
@@ -103,21 +97,21 @@ export const hiveBRTheme = extendTheme({
         },
     },
     shadows: {
-        xs: '0 0 2px 0 rgba(0, 153, 204, 0.3)',
-        sm: '0 1px 2px 0 rgba(0, 153, 204, 0.3)',
-        base: '0 1px 3px 0 rgba(0, 153, 204, 0.4), 0 1px 2px 0 rgba(0, 153, 204, 0.2)',
-        md: '0 4px 6px -1px rgba(0, 153, 204, 0.4), 0 2px 4px -1px rgba(0, 153, 204, 0.2)',
-        lg: '0 10px 15px -3px rgba(0, 153, 204, 0.5), 0 4px 6px -2px rgba(0, 153, 204, 0.3)',
-        xl: '0 20px 25px -5px rgba(0, 153, 204, 0.5), 0 10px 10px -5px rgba(0, 153, 204, 0.3)',
-        '2xl': '0 25px 50px -12px rgba(0, 153, 204, 0.6)',
-        outline: '0 0 0 3px rgba(255, 223, 0, 0.5)',  // Yellow outline
-        inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.5)',
+        xs: '0 0 2px 0 rgba(227, 25, 55, 0.5)',
+        sm: '0 1px 2px 0 rgba(227, 25, 55, 0.5)',
+        base: '0 1px 3px 0 rgba(227, 25, 55, 0.5), 0 1px 2px 0 rgba(227, 25, 55, 0.3)',
+        md: '0 4px 6px -1px rgba(227, 25, 55, 0.5), 0 2px 4px -1px rgba(227, 25, 55, 0.3)',
+        lg: '0 10px 15px -3px rgba(227, 25, 55, 0.5), 0 4px 6px -2px rgba(227, 25, 55, 0.3)',
+        xl: '0 20px 25px -5px rgba(227, 25, 55, 0.5), 0 10px 10px -5px rgba(227, 25, 55, 0.3)',
+        '2xl': '0 25px 50px -12px rgba(227, 25, 55, 0.7)',
+        outline: '0 0 0 3px rgba(227, 25, 55, 0.6)',
+        inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.8)',
         none: 'none',
-        'dark-lg': 'rgba(0, 153, 204, 0.5) 0px 10px 15px -3px, rgba(0, 153, 204, 0.3) 0px 4px 6px -2px',
+        'dark-lg': 'rgba(227, 25, 55, 0.5) 0px 10px 15px -3px, rgba(227, 25, 55, 0.3) 0px 4px 6px -2px',
     },
     styles: {
         global: {
-            ...swiperStyles, // Apply Swiper styles globally
+            ...swiperStyles,
         },
     },
     components: {
@@ -141,28 +135,24 @@ export const hiveBRTheme = extendTheme({
             },
             variants: {
                 solid: {
-                    bg: 'primary',  // Yellow background
-                    color: 'background',  // Dark blue text
-                    fontWeight: 'bold',
+                    bg: 'primary',
+                    color: 'white',
                     _hover: {
-                        bg: 'secondary',  // Green on hover
-                        color: 'white',
+                        bg: 'accent',
+                        color: 'background',
                     },
                 },
                 outline: {
-                    borderColor: 'secondary',  // Green border
-                    borderWidth: '2px',
-                    color: 'secondary',  // Green text
+                    borderColor: 'primary',
+                    color: 'primary',
                     _hover: {
-                        bg: 'secondary',  // Green background on hover
-                        color: 'white',
+                        bg: 'muted',
                     },
                 },
                 ghost: {
-                    color: 'primary',  // Yellow text
+                    color: 'primary',
                     _hover: {
                         bg: 'muted',
-                        color: 'accent',  // Cyan text on hover
                     },
                 },
             },

@@ -25,9 +25,9 @@ interface TransactionHistoryProps {
 }
 
 export default function TransactionHistory({ username }: TransactionHistoryProps) {
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.700');
-  const hoverBg = useColorModeValue('gray.50', 'gray.700');
+  const cardBg = 'muted';
+  const borderColor = 'border';
+  const hoverBg = 'secondary';
   
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [hasMore, setHasMore] = useState(true);
@@ -136,12 +136,13 @@ export default function TransactionHistory({ username }: TransactionHistoryProps
   };
 
   const getTransactionColor = (type: string, from: string) => {
-    if (type === 'claim_rewards') return 'purple';
-    if (type === 'power_up') return 'green';
-    if (type === 'power_down') return 'orange';
-    if (type === 'to_savings') return 'teal';
-    if (type === 'from_savings') return 'cyan';
-    return from === username ? 'red' : 'green';
+    // Return theme color names instead of Chakra color schemes
+    if (type === 'claim_rewards') return 'accent';
+    if (type === 'power_up') return 'success';
+    if (type === 'power_down') return 'warning';
+    if (type === 'to_savings') return 'primary';
+    if (type === 'from_savings') return 'primary';
+    return from === username ? 'error' : 'success';
   };
 
   const getTransactionLabel = (type: string, from: string, to: string) => {
@@ -305,8 +306,8 @@ export default function TransactionHistory({ username }: TransactionHistoryProps
                     w={8}
                     h={8}
                     borderRadius="full"
-                    bg={`${getTransactionColor(tx.type, tx.from)}.100`}
-                    color={`${getTransactionColor(tx.type, tx.from)}.500`}
+                    bg="secondary"
+                    color={getTransactionColor(tx.type, tx.from)}
                     alignItems="center"
                     justifyContent="center"
                     flexShrink={0}
@@ -318,7 +319,8 @@ export default function TransactionHistory({ username }: TransactionHistoryProps
                   <Box flex={1} minW={0}>
                     <Flex alignItems="center" gap={2}>
                       <Badge
-                        colorScheme={getTransactionColor(tx.type, tx.from)}
+                        bg={getTransactionColor(tx.type, tx.from)}
+                        color="background"
                         fontSize="2xs"
                         px={1.5}
                         py={0.5}
@@ -346,7 +348,7 @@ export default function TransactionHistory({ username }: TransactionHistoryProps
                   <Text
                     fontWeight="semibold"
                     fontSize="xs"
-                    color={isOutgoing && tx.type === 'transfer' ? 'red.500' : 'green.500'}
+                    color={isOutgoing && tx.type === 'transfer' ? 'error' : 'success'}
                     flexShrink={0}
                   >
                     {isOutgoing && tx.type === 'transfer' ? '-' : '+'} {tx.amount}

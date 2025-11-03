@@ -79,12 +79,12 @@ export default function FollowersModal({ isOpen, onClose, username, type }: Foll
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="md" scrollBehavior="inside">
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>
+      <ModalOverlay bg="blackAlpha.700" />
+      <ModalContent bg="muted" borderColor="border" borderWidth="2px">
+        <ModalHeader color="primary" borderBottomWidth="1px" borderBottomColor="border">
           {type === 'followers' ? 'Followers' : 'Following'}
         </ModalHeader>
-        <ModalCloseButton />
+        <ModalCloseButton color="primary" _hover={{ bg: 'background' }} />
         <ModalBody pb={6}>
           {loading ? (
             <Box display="flex" justifyContent="center" alignItems="center" py={8}>
@@ -92,7 +92,7 @@ export default function FollowersModal({ isOpen, onClose, username, type }: Foll
             </Box>
           ) : users.length === 0 ? (
             <Box textAlign="center" py={8}>
-              <Text color="gray.500">
+              <Text color="accent">
                 No {type} found
               </Text>
             </Box>
@@ -109,8 +109,16 @@ export default function FollowersModal({ isOpen, onClose, username, type }: Foll
                   <HStack
                     p={3}
                     borderRadius="md"
-                    _hover={{ bg: 'muted' }}
-                    transition="background 0.2s"
+                    bg="background"
+                    borderWidth="1px"
+                    borderColor="border"
+                    _hover={{ 
+                      bg: 'muted',
+                      borderColor: 'primary',
+                      transform: 'translateY(-1px)',
+                      shadow: 'md'
+                    }}
+                    transition="all 0.2s"
                     cursor="pointer"
                   >
                     <Avatar
@@ -118,7 +126,7 @@ export default function FollowersModal({ isOpen, onClose, username, type }: Foll
                       name={user}
                       src={`https://images.hive.blog/u/${user}/avatar/small`}
                     />
-                    <Text fontWeight="medium">@{user}</Text>
+                    <Text fontWeight="medium" color="text">@{user}</Text>
                   </HStack>
                 </Link>
               ))}
@@ -130,6 +138,8 @@ export default function FollowersModal({ isOpen, onClose, username, type }: Foll
                   variant="ghost"
                   w="full"
                   mt={2}
+                  color="primary"
+                  _hover={{ bg: 'background', color: 'accent' }}
                 >
                   Load More
                 </Button>

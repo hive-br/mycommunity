@@ -86,7 +86,7 @@ export default function Sidebar() {
         };
 
         fetchData();
-    }, [communityTag]);
+    }, []);
 
     const handleNavigation = (path: string) => {
         if (router) {

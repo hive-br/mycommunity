@@ -6,12 +6,16 @@ import { FaGlobe } from 'react-icons/fa';
 import { getProfile, findPosts } from '@/lib/hive/client-functions';
 import PostGrid from '../blog/PostGrid';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import UserActionButtons from './UserActionButtons';
+import FollowersModal from './FollowersModal';
+import { useAioha } from '@aioha/react-ui';
 
 interface ProfilePageProps {
   username: string;
 }
 
 export default function ProfilePage({ username }: ProfilePageProps) {
+  const { user } = useAioha();
   const { hiveAccount, isLoading, error } = useHiveAccount(username);
   const [profileMetadata, setProfileMetadata] = useState<{ profileImage: string; coverImage: string; website: string }>({
     profileImage: '',
@@ -20,6 +24,8 @@ export default function ProfilePage({ username }: ProfilePageProps) {
   });
   const [profileInfo, setProfileInfo] = useState<any>(null);
   const [posts, setPosts] = useState<any[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<'followers' | 'following'>('followers');
   const isFetching = useRef(false);
 
   const tag = process.env.NEXT_PUBLIC_HIVE_COMMUNITY_TAG;
@@ -124,7 +130,7 @@ export default function ProfilePage({ username }: ProfilePageProps) {
           />
         </Container>
       </Box>
-      <Flex position="relative" mt={-16} p={4} alignItems="center" boxShadow="lg">
+      <Flex position="relative" mt={-16} p={4} alignItems="center" boxShadow="lg" justifyContent="space-between">
   <Box
     position="absolute"
     top={0}
@@ -161,7 +167,31 @@ export default function ProfilePage({ username }: ProfilePageProps) {
 
       {/* Description */}
       <Text fontSize="xs" color="text">
-        Following: {following} | Followers: {followers} | Location: {location}
+        <Text
+          as="span"
+          cursor="pointer"
+          _hover={{ textDecoration: 'underline', color: 'primary' }}
+          onClick={() => {
+            setModalType('following');
+            setModalOpen(true);
+          }}
+        >
+          Following: {following}
+        </Text>
+        {' | '}
+        <Text
+          as="span"
+          cursor="pointer"
+          _hover={{ textDecoration: 'underline', color: 'primary' }}
+          onClick={() => {
+            setModalType('followers');
+            setModalOpen(true);
+          }}
+        >
+          Followers: {followers}
+        </Text>
+        {' | '}
+        Location: {location}
         <br />
         {about}
       </Text>
@@ -177,6 +207,11 @@ export default function ProfilePage({ username }: ProfilePageProps) {
       )}
     </Box>
   </Flex>
+
+  {/* Action buttons - only shown when viewing another user's profile */}
+  <Box zIndex={2} position="relative">
+    <UserActionButtons targetUsername={username} currentUsername={user || null} />
+  </Box>
 </Flex>
 
       <Container maxW="container.lg" mt={8}>
@@ -193,6 +228,14 @@ export default function ProfilePage({ username }: ProfilePageProps) {
           {posts && <PostGrid posts={posts} columns={3} />}
         </InfiniteScroll>
       </Container>
+
+      {/* Followers/Following Modal */}
+      <FollowersModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        username={username}
+        type={modalType}
+      />
     </Box>
   );
 }

@@ -4,7 +4,7 @@
 import PostPage from "@/components/blog/PostPage";
 import NotificationsComp from "@/components/notifications/NotificationsComp";
 import ProfilePage from "@/components/profile/ProfilePage";
-import MainWallet from "@/components/wallet/MainWallet";
+import WalletPage from "@/components/wallet/WalletPage";
 
 interface HomePageProps {
   params: {
@@ -20,7 +20,7 @@ export default function HomePage({ params }: HomePageProps) {
       )
     } else if ((params.slug.length === 2 && decodeURIComponent(params.slug[0]).startsWith('@')) && params.slug[1] === 'wallet') {
       return (
-        <MainWallet username={decodeURIComponent(params.slug[0]).slice(1)} />
+        <WalletPage username={decodeURIComponent(params.slug[0]).slice(1)} />
       )
     } else if ((params.slug.length === 2 && decodeURIComponent(params.slug[0]).startsWith('@')) && params.slug[1] === 'notifications') {
       return (

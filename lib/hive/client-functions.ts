@@ -453,3 +453,303 @@ export async function getLastSnapsContainer() {
       permlink: result[0].permlink
   }
 }
+
+/**
+ * Get the relationship between two accounts using Bridge API
+ * @param follower - The account that might be following
+ * @param following - The account that might be followed
+ * @returns Object with relationship information (follows, ignores, blacklists)
+ */
+export async function getRelationshipBetweenAccounts(
+  follower: string,
+  following: string
+): Promise<{
+  follows: boolean;
+  ignores: boolean;
+  blacklists: boolean;
+}> {
+  try {
+    const result = await HiveClient.call('bridge', 'get_relationship_between_accounts', [
+      follower,
+      following
+    ]);
+
+    return {
+      follows: result?.follows || false,
+      ignores: result?.ignores || false,
+      blacklists: result?.blacklists || false,
+    };
+  } catch (error) {
+    console.error('Error fetching relationship between accounts:', error);
+    return {
+      follows: false,
+      ignores: false,
+      blacklists: false,
+    };
+  }
+}
+
+/**
+ * Set user relationship (follow, mute, blacklist, or unfollow) using Keychain
+ * @param follower - The username performing the action
+ * @param following - The username to follow/mute/blacklist
+ * @param type - Type of action: 'blog' (follow), 'ignore' (mute), 'blacklist', or '' (unfollow)
+ * @returns Promise<boolean> - True if successful
+ */
+export async function setUserRelationship(
+  follower: string,
+  following: string,
+  type: 'blog' | 'ignore' | 'blacklist' | ''
+): Promise<boolean> {
+  try {
+    const keychain = new KeychainSDK(window);
+    
+    const json = JSON.stringify([
+      'follow',
+      {
+        follower,
+        following,
+        what: type ? [type] : [], // Empty array for unfollow
+      },
+    ]);
+
+    const formParamsAsObject = {
+      data: {
+        username: follower,
+        id: 'follow',
+        method: KeychainKeyTypes.posting,
+        json: json,
+      },
+    };
+
+    const result = await keychain.custom(formParamsAsObject.data as unknown as Custom);
+    
+    if (result.success) {
+      console.log('Relationship update success:', result);
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('Error setting user relationship:', error);
+    return false;
+  }
+}
+
+/**
+ * Get the following list for a user
+ * @param username - The username to get following list for
+ * @param startFollowing - Optional: username to start from for pagination
+ * @param limit - Optional: number of results to return (default: 100)
+ * @returns Array of usernames that the user is following
+ */
+export async function getFollowing(
+  username: string,
+  startFollowing: string = '',
+  limit: number = 100
+): Promise<string[]> {
+  try {
+    const result = await HiveClient.database.call('get_following', [
+      username,
+      startFollowing,
+      'blog',
+      limit
+    ]);
+    
+    // The result is an array of objects with 'following' property
+    return result.map((item: any) => item.following).filter(Boolean);
+  } catch (error) {
+    console.error('Error fetching following list:', error);
+    return [];
+  }
+}
+
+/**
+ * Get the followers list for a user
+ * @param username - The username to get followers list for
+ * @param startFollower - Optional: username to start from for pagination
+ * @param limit - Optional: number of results to return (default: 100)
+ * @returns Array of usernames that follow the user
+ */
+export async function getFollowers(
+  username: string,
+  startFollower: string = '',
+  limit: number = 100
+): Promise<string[]> {
+  try {
+    const result = await HiveClient.database.call('get_followers', [
+      username,
+      startFollower,
+      'blog',
+      limit
+    ]);
+    
+    // The result is an array of objects with 'follower' property
+    return result.map((item: any) => item.follower).filter(Boolean);
+  } catch (error) {
+    console.error('Error fetching followers list:', error);
+    return [];
+  }
+}
+
+/**
+ * Get current HIVE and HBD prices from CoinGecko
+ * @returns Object with HIVE and HBD prices in USD
+ */
+export async function getCryptoPrices(): Promise<{ hive: number; hbd: number }> {
+  try {
+    const response = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=hive,hive_dollar&vs_currencies=usd'
+    );
+    const data = await response.json();
+    
+    return {
+      hive: data.hive?.usd || 0,
+      hbd: data.hive_dollar?.usd || 0,
+    };
+  } catch (error) {
+    console.error('Error fetching crypto prices:', error);
+    return { hive: 0, hbd: 0 };
+  }
+}
+
+/**
+ * Transaction interface for wallet history
+ */
+export interface Transaction {
+  type: string;
+  from: string;
+  to: string;
+  amount: string;
+  memo: string;
+  timestamp: string;
+  trx_id?: string;
+}
+
+/**
+ * Get transaction history for a user
+ * @param username - Hive username
+ * @param start - Starting index (use -1 for most recent, or specific index for pagination)
+ * @param limit - Number of transactions to fetch
+ * @returns Array of transactions
+ */
+export async function getTransactionHistory(
+  username: string,
+  start: number = -1,
+  limit: number = 100
+): Promise<{ transactions: Transaction[], oldestIndex: number }> {
+  try {
+    // Get account history with transfer operations
+    const history = await HiveClient.database.getAccountHistory(
+      username,
+      start,
+      limit
+    );
+
+    const transactions: Transaction[] = [];
+    let oldestIndex = -1;
+
+    for (const [index, transaction] of history) {
+      // Track the minimum index we've seen
+      if (oldestIndex === -1 || index < oldestIndex) {
+        oldestIndex = index;
+      }
+      
+      const op = transaction.op;
+      const opType = op[0];
+      const opData = op[1];
+
+      // Filter for transfer operations
+      if (opType === 'transfer') {
+        transactions.push({
+          type: 'transfer',
+          from: opData.from,
+          to: opData.to,
+          amount: opData.amount,
+          memo: opData.memo || '',
+          timestamp: transaction.timestamp,
+          trx_id: transaction.trx_id,
+        });
+      } else if (opType === 'transfer_to_vesting') {
+        transactions.push({
+          type: 'power_up',
+          from: opData.from,
+          to: opData.to,
+          amount: opData.amount,
+          memo: 'Power Up',
+          timestamp: transaction.timestamp,
+          trx_id: transaction.trx_id,
+        });
+      } else if (opType === 'withdraw_vesting') {
+        // Convert VESTS to HIVE
+        const vestsAmount = parseFloat(opData.vesting_shares.split(' ')[0]);
+        const hiveAmount = await convertVestToHive(vestsAmount);
+        
+        transactions.push({
+          type: 'power_down',
+          from: opData.account,
+          to: opData.account,
+          amount: `${hiveAmount.toFixed(3)} HIVE`,
+          memo: 'Power Down',
+          timestamp: transaction.timestamp,
+          trx_id: transaction.trx_id,
+        });
+      } else if (opType === 'transfer_to_savings') {
+        transactions.push({
+          type: 'to_savings',
+          from: opData.from,
+          to: opData.to,
+          amount: opData.amount,
+          memo: opData.memo || 'Transfer to Savings',
+          timestamp: transaction.timestamp,
+          trx_id: transaction.trx_id,
+        });
+      } else if (opType === 'transfer_from_savings') {
+        transactions.push({
+          type: 'from_savings',
+          from: opData.from,
+          to: opData.to,
+          amount: opData.amount,
+          memo: opData.memo || 'Withdraw from Savings',
+          timestamp: transaction.timestamp,
+          trx_id: transaction.trx_id,
+        });
+      } else if (opType === 'claim_reward_balance') {
+        const rewards = [];
+        
+        if (opData.reward_hive && opData.reward_hive !== '0.000 HIVE') {
+          rewards.push(opData.reward_hive);
+        }
+        if (opData.reward_hbd && opData.reward_hbd !== '0.000 HBD') {
+          rewards.push(opData.reward_hbd);
+        }
+        if (opData.reward_vests && opData.reward_vests !== '0.000000 VESTS') {
+          // Convert VESTS to HIVE for display
+          const vestsAmount = parseFloat(opData.reward_vests.split(' ')[0]);
+          const hiveAmount = await convertVestToHive(vestsAmount);
+          rewards.push(`${hiveAmount.toFixed(3)} HP`);
+        }
+        
+        if (rewards.length > 0) {
+          transactions.push({
+            type: 'claim_rewards',
+            from: 'rewards',
+            to: opData.account,
+            amount: rewards.join(' + '),
+            memo: 'Claim Rewards',
+            timestamp: transaction.timestamp,
+            trx_id: transaction.trx_id,
+          });
+        }
+      }
+    }
+
+    // Return in chronological order (newest first)
+    return {
+      transactions: transactions.reverse(),
+      oldestIndex: oldestIndex
+    };
+  } catch (error) {
+    console.error('Error fetching transaction history:', error);
+    return { transactions: [], oldestIndex: -1 };
+  }
+}

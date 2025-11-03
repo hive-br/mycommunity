@@ -24,7 +24,7 @@ export default function FooterNavigation() {
             p={2}
             borderTop="1px solid"
             borderColor="tb1"
-            display={{ base: 'block', md: 'none' }}
+            display={{ base: 'block', sm: 'none' }}
             zIndex="999"
         >
             <HStack justify="space-around">

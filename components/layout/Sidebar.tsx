@@ -1,13 +1,12 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { Box, VStack, Button, Icon, Image, Spinner, Flex, Text, useColorMode, transition } from '@chakra-ui/react';
-import { useRouter } from 'next/navigation';
+import { Box, VStack, Button, Icon, Image, Spinner, Flex, Text, useColorMode, transition, Tooltip, useBreakpointValue } from '@chakra-ui/react';
+import { useRouter, usePathname } from 'next/navigation';
 import { AiohaModal, useAioha } from '@aioha/react-ui';
-import { FiHome, FiBell, FiUser, FiShoppingCart, FiBook, FiCreditCard } from 'react-icons/fi';
+import { FiHome, FiBell, FiUser, FiShoppingCart, FiBook, FiCreditCard, FiLogIn, FiLogOut } from 'react-icons/fi';
 import { Notifications } from '@hiveio/dhive';
 import { fetchNewNotifications, getCommunityInfo, getProfile } from '@/lib/hive/client-functions';
 import { animate, color, motion, px } from 'framer-motion';
-import { FaGear } from 'react-icons/fa6';
 import { KeyTypes } from '@aioha/aioha';
 import '@aioha/react-ui/dist/build.css';
 
@@ -30,12 +29,24 @@ const communityTag = process.env.NEXT_PUBLIC_HIVE_COMMUNITY_TAG;
 export default function Sidebar() {
     const { user } = useAioha();
     const router = useRouter();
+    const pathname = usePathname();
     const [notifications, setNotifications] = useState<Notifications[]>([]);
     const [communityInfo, setCommunityInfo] = useState<CommunityInfo | null>(null); // State to hold community info
     const [profileInfo, setProfileInfo] = useState<ProfileInfo | null>(null); // State to hold profile info
     const [loading, setLoading] = useState(true); // Loading state
     const { colorMode } = useColorMode();
     const [modalDisplayed, setModalDisplayed] = useState(false);
+    
+    // Check if we should force compact mode (compose page)
+    const forceCompact = pathname === '/compose';
+    // Determine display values based on whether we're forcing compact or using responsive
+    const compactBreakpoint = forceCompact ? 'block' : { sm: 'block', md: 'none' };
+    const fullBreakpoint = forceCompact ? 'none' : { sm: 'none', md: 'flex' };
+    const textDisplay = forceCompact ? 'none' : { sm: 'none', md: 'block' };
+    const iconJustify = forceCompact ? 'center' : { sm: 'center', md: 'flex-start' };
+    
+    // Detect if we're in compact mode for tooltip logic
+    const isCompactMode = useBreakpointValue({ base: false, sm: true, md: false }) || forceCompact;
 
     useEffect(() => {
         const loadNotifications = async () => {
@@ -82,19 +93,20 @@ export default function Sidebar() {
             router.push(path);
         }
     };
+
     return (
         <Box
             as="nav"
             bg="muted"
             p={1}
-            w={{ base: 'full', md: '20%' }}
-            // minH={{ base: 'auto', md: '100vh' }}
+            w={forceCompact ? '60px' : { base: 'full', sm: '60px', md: '20%' }}
             h={"100vh"}
-            position={{ base: 'relative', md: 'fixed' }}
-            left={{ base: 'auto', md: '0' }}
-            top={{ base: 'auto', md: '0' }}
-            zIndex={{ base: 'auto', md: '10' }}
-            display={{ base: 'none', md: 'block' }}
+            position={{ base: 'relative', sm: 'fixed' }}
+            left={{ base: 'auto', sm: '0' }}
+            top={{ base: 'auto', sm: '0' }}
+            zIndex={{ base: 'auto', sm: '10' }}
+            display={{ base: 'none', sm: 'block' }}
+            transition="width 0.3s ease"
             sx={{
                 '&::-webkit-scrollbar': {
                     display: 'none',
@@ -102,13 +114,13 @@ export default function Sidebar() {
                 scrollbarWidth: 'none',
             }}
         >
-            <Flex direction="column" justify="space-between" height="100%">
-                <VStack spacing={4} align="start" ml={4}>
+            <Flex direction="column" justify="space-between" height="100%" px={forceCompact ? 1 : { sm: 1, md: 3 }}>
+                <VStack spacing={4} align={forceCompact ? 'center' : { sm: 'center', md: 'start' }} w="full">
                     {loading ? (
                         <Spinner size="sm" />
                     ) : (
                         <>
-                            <Flex align="center" mb={4}>
+                            <Flex align="center" mb={4} display={fullBreakpoint}>
                                 {profileInfo?.metadata?.profile?.profile_image && (
                                     <Image
                                         src={profileInfo.metadata.profile.profile_image}
@@ -120,97 +132,125 @@ export default function Sidebar() {
                                 )}
                                 <Text fontSize="lg" fontWeight="bold">{communityInfo?.title}</Text>
                             </Flex>
-                            {/* <Text fontSize="sm" color="gray.500">{communityInfo?.about}</Text> */}
+                            {/* Icon only for compact view */}
+                            <Box display={compactBreakpoint} mb={4} w="40px" h="40px">
+                                {profileInfo?.metadata?.profile?.profile_image && (
+                                    <Image
+                                        src={profileInfo.metadata.profile.profile_image}
+                                        alt="Profile Image"
+                                        boxSize="40px"
+                                        borderRadius="full"
+                                        objectFit="cover"
+                                        minW="40px"
+                                        minH="40px"
+                                    />
+                                )}
+                            </Box>
                         </>
                     )}
 
-                    <Button
-                        onClick={() => handleNavigation("/")}
-                        variant="ghost"
-                        w="full"
-                        justifyContent="flex-start"
-                        leftIcon={<Icon as={FiHome} boxSize={4} />}
-                        px={1}
-                        mt={4}
-                    >
-                        Home
-                    </Button>
-                    <Button
-                        onClick={() => handleNavigation("/blog")}
-                        variant="ghost"
-                        w="full"
-                        justifyContent="flex-start"
-                        leftIcon={<Icon as={FiBook} boxSize={4} />}
-                        px={1}
-                    >
-                        Blog
-                    </Button>
+                    <Tooltip label="Home" placement="right" hasArrow isDisabled={!isCompactMode}>
+                        <Box w="full">
+                            <Button
+                                onClick={() => handleNavigation("/")}
+                                variant="ghost"
+                                w="full"
+                                justifyContent={iconJustify}
+                                leftIcon={<Icon as={FiHome} boxSize={4} />}
+                                px={3}
+                                mt={4}
+                                borderRadius="md"
+                            >
+                                <Text display={textDisplay}>Home</Text>
+                            </Button>
+                        </Box>
+                    </Tooltip>
+                    <Tooltip label="Blog" placement="right" hasArrow isDisabled={!isCompactMode}>
+                        <Box w="full">
+                            <Button
+                                onClick={() => handleNavigation("/blog")}
+                                variant="ghost"
+                                w="full"
+                                justifyContent={iconJustify}
+                                leftIcon={<Icon as={FiBook} boxSize={4} />}
+                                px={3}
+                                borderRadius="md"
+                            >
+                                <Text display={textDisplay}>Blog</Text>
+                            </Button>
+                        </Box>
+                    </Tooltip>
                     {user && (
                         <>
-                            <Button
-                                onClick={() => handleNavigation("/@" + user + "/notifications")}
-                                variant="ghost"
-                                w="full"
-                                justifyContent="flex-start"
-                                leftIcon={
-                                    notifications.length > 0 ? (
-                                        <motion.div
-                                            animate={{ rotate: [0, 45, 0, -45, 0] }}
-                                            transition={{ duration: 0.6, repeat: Infinity }}
-                                        >
-                                            <Icon as={FiBell} boxSize={4} color="red" />
-                                        </motion.div>
-                                    ) : (
-                                        <Icon as={FiBell} boxSize={4} />
-                                    )
-                                }
-                                px={1}
-                            >
-                                Notifications
-                            </Button>
-                            <Button
-                                onClick={() => handleNavigation("/@" + user)}
-                                variant="ghost"
-                                w="full"
-                                justifyContent="flex-start"
-                                leftIcon={
-                                    user ? (
-                                        <Image
-                                            src={`https://images.hive.blog/u/${user}/avatar`}
-                                            alt="Profile Image"
-                                            boxSize={4}
-                                            borderRadius="full"
-                                        />
-                                    ) : (
-                                        <Icon as={FiUser} boxSize={4} />
-                                    )
-                                }
-                                px={1}
-                            >
-                                Profile
-                            </Button>
-                            <Button
-                                onClick={() => handleNavigation("/@" + user + '/wallet')}
-                                variant="ghost"
-                                w="full"
-                                justifyContent="flex-start"
-                                leftIcon={<Icon as={FiCreditCard} boxSize={4} />}
-                                px={1}
-                            >
-                                Wallet
-                            </Button>
+                            <Tooltip label="Notifications" placement="right" hasArrow isDisabled={!isCompactMode}>
+                                <Box w="full">
+                                    <Button
+                                        onClick={() => handleNavigation("/@" + user + "/notifications")}
+                                        variant="ghost"
+                                        w="full"
+                                        justifyContent={iconJustify}
+                                        leftIcon={
+                                            notifications.length > 0 ? (
+                                                <motion.div
+                                                    animate={{ rotate: [0, 45, 0, -45, 0] }}
+                                                    transition={{ duration: 0.6, repeat: Infinity }}
+                                                >
+                                                    <Icon as={FiBell} boxSize={4} color="red" />
+                                                </motion.div>
+                                            ) : (
+                                                <Icon as={FiBell} boxSize={4} />
+                                            )
+                                        }
+                                        px={3}
+                                        borderRadius="md"
+                                    >
+                                        <Text display={textDisplay}>Notifications</Text>
+                                    </Button>
+                                </Box>
+                            </Tooltip>
+                            <Tooltip label="Profile" placement="right" hasArrow isDisabled={!isCompactMode}>
+                                <Box w="full">
+                                    <Button
+                                        onClick={() => handleNavigation("/@" + user)}
+                                        variant="ghost"
+                                        w="full"
+                                        justifyContent={iconJustify}
+                                        leftIcon={
+                                            user ? (
+                                                <Image
+                                                    src={`https://images.hive.blog/u/${user}/avatar`}
+                                                    alt="Profile Image"
+                                                    boxSize={4}
+                                                    borderRadius="full"
+                                                />
+                                            ) : (
+                                                <Icon as={FiUser} boxSize={4} />
+                                            )
+                                        }
+                                        px={3}
+                                        borderRadius="md"
+                                    >
+                                        <Text display={textDisplay}>Profile</Text>
+                                    </Button>
+                                </Box>
+                            </Tooltip>
+                            <Tooltip label="Wallet" placement="right" hasArrow isDisabled={!isCompactMode}>
+                                <Box w="full">
+                                    <Button
+                                        onClick={() => handleNavigation("/@" + user + '/wallet')}
+                                        variant="ghost"
+                                        w="full"
+                                        justifyContent={iconJustify}
+                                        leftIcon={<Icon as={FiCreditCard} boxSize={4} />}
+                                        px={3}
+                                        borderRadius="md"
+                                    >
+                                        <Text display={textDisplay}>Wallet</Text>
+                                    </Button>
+                                </Box>
+                            </Tooltip>
                         </>
                     )}
-                    <Button
-                        onClick={() => handleNavigation("/settings")}
-                        variant="ghost"
-                        w="full"
-                        justifyContent="flex-start"
-                        leftIcon={<Icon as={FaGear} boxSize={4} />}
-                        px={1}
-                    >
-                        Settings
-                    </Button>
                 </VStack>
                 <div className={colorMode}>
                     <AiohaModal
@@ -224,15 +264,22 @@ export default function Sidebar() {
                         onClose={() => setModalDisplayed(false)}
                     />
                 </div>
-                <Button
-                    onClick={() => setModalDisplayed(true)}
-                    variant="solid"
-                    colorScheme="teal"
-                    w="full"
-                    mt="auto"
-                >
-                    {user ? 'Logout' : 'Login'}
-                </Button>
+                <Tooltip label={user ? 'Logout' : 'Login'} placement="right" hasArrow isDisabled={!isCompactMode}>
+                    <Box w="full" px={forceCompact ? 0 : { sm: 0, md: 4 }}>
+                        <Button
+                            onClick={() => setModalDisplayed(true)}
+                            variant="solid"
+                            colorScheme="teal"
+                            w="full"
+                            mt="auto"
+                            px={{ sm: 2, md: 4 }}
+                            leftIcon={<Icon as={user ? FiLogOut : FiLogIn} boxSize={4} display={compactBreakpoint} />}
+                            justifyContent="center"
+                        >
+                            <Box display={textDisplay}>{user ? 'Logout' : 'Login'}</Box>
+                        </Button>
+                    </Box>
+                </Tooltip>
             </Flex>
         </Box>
     );

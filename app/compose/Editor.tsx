@@ -1,7 +1,7 @@
 'use client';
 import { getFileSignature, uploadImage } from '@/lib/hive/client-functions';
 import { FC, useRef, useState, useCallback, useEffect } from "react";
-import { Box, Flex, Button, useToast, Textarea, IconButton, HStack, Menu, MenuButton, MenuList, MenuItem, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, Input, Tag, TagLabel, TagCloseButton, Wrap, WrapItem } from '@chakra-ui/react';
+import { Box, Flex, Button, useToast, Textarea, IconButton, HStack, Menu, MenuButton, MenuList, MenuItem, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, Input, Tag, TagLabel, TagCloseButton, Wrap, WrapItem, useBreakpointValue } from '@chakra-ui/react';
 import { FaImage, FaEye, FaCode, FaBold, FaItalic, FaLink, FaListUl, FaListOl, FaQuoteLeft, FaUnderline, FaStrikethrough, FaHeading, FaChevronDown, FaTable, FaEyeSlash, FaSmile } from 'react-icons/fa';
 import { MdGif } from 'react-icons/md';
 import markdownRenderer from '@/lib/utils/MarkdownRenderer';
@@ -147,9 +147,17 @@ interface EditorProps {
 const Editor: FC<EditorProps> = ({ markdown, setMarkdown, title, setTitle, hashtagInput, setHashtagInput, hashtags, setHashtags, onSubmit }) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const toast = useToast();
-    const [viewMode, setViewMode] = useState<'editor' | 'preview' | 'split'>('split');
+    const isMobile = useBreakpointValue({ base: true, sm: false }, { ssr: false });
+    const [viewMode, setViewMode] = useState<'editor' | 'preview' | 'split'>(isMobile ? 'editor' : 'split');
     const [spoilerStates, setSpoilerStates] = useState<{[key: string]: boolean}>({});
     const [isGiphyModalOpen, setGiphyModalOpen] = useState(false);
+    
+    // Handle mobile changes - switch to editor if mobile and currently in split
+    useEffect(() => {
+        if (isMobile && viewMode === 'split') {
+            setViewMode('editor');
+        }
+    }, [isMobile, viewMode]);
 
     // Custom image upload handler
     const handleImageUpload = useCallback(async (file: File): Promise<string> => {
@@ -286,14 +294,16 @@ const Editor: FC<EditorProps> = ({ markdown, setMarkdown, title, setTitle, hasht
                 >
                     Editor
                 </Button>
-                <Button
-                    leftIcon={<FaEye />}
-                    size="sm"
-                    variant={viewMode === 'split' ? 'solid' : 'outline'}
-                    onClick={() => setViewMode('split')}
-                >
-                    Split
-                </Button>
+                {!isMobile && (
+                    <Button
+                        leftIcon={<FaEye />}
+                        size="sm"
+                        variant={viewMode === 'split' ? 'solid' : 'outline'}
+                        onClick={() => setViewMode('split')}
+                    >
+                        Split
+                    </Button>
+                )}
                 <Button
                     leftIcon={<FaEye />}
                     size="sm"
@@ -341,7 +351,7 @@ const Editor: FC<EditorProps> = ({ markdown, setMarkdown, title, setTitle, hasht
                         
                         {/* Markdown Editor Panel */}
                         <Box 
-                            h="400px"
+                            h="100%"
                             border="1px solid"
                             borderColor="gray.200"
                             borderRadius="md"
@@ -358,6 +368,7 @@ const Editor: FC<EditorProps> = ({ markdown, setMarkdown, title, setTitle, hasht
                             display="flex"
                             alignItems="center"
                             gap={0.5}
+                            flexWrap="wrap"
                         >
                             {/* Header Dropdown */}
                             <Menu>

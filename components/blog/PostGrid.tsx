@@ -16,7 +16,7 @@ export default function PostGrid({ posts, columns }: PostGridProps) {
 
     return (
         <SimpleGrid
-            columns={{ base: 1, sm: columns, md: columns, lg: columns, xl: columns }}
+            columns={{ base: 1, sm: columns === 1 ? 1 : 2, md: columns, lg: columns, xl: columns }}
             spacing={4}
         >
             {posts.map((post) => (

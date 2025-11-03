@@ -5,8 +5,6 @@ import crypto from 'crypto';
 import { signImageHash } from "./server-functions";
 import { Account, Discussion, Notifications, PublicKey, PrivateKey, KeyRole } from "@hiveio/dhive";
 import { extractNumber } from "../utils/extractNumber";
-import { profileEnd } from "console";
-import { convertSelectionToNode$ } from "@mdxeditor/editor";
 import { ExtendedComment } from "@/hooks/useComments";
 
 interface HiveKeychainResponse {

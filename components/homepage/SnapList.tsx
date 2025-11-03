@@ -1,12 +1,12 @@
 import React from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { Box, Spinner, VStack, Text } from '@chakra-ui/react';
-import Tweet from './Tweet';
+import Snap from './Snap';
 import { ExtendedComment, useComments } from '@/hooks/useComments';
 import { useSnaps } from '@/hooks/useSnaps';
-import TweetComposer from './TweetComposer';
+import SnapComposer from './SnapComposer';
 
-interface TweetListProps {
+interface SnapListProps {
   author: string
   permlink: string
   setConversation: (conversation: ExtendedComment) => void;
@@ -28,19 +28,17 @@ function handleNewComment() {
 
 }
 
-export default function TweetList(
-{
-  author,
-  permlink,
-  setConversation,
-  onOpen,
-  setReply,
-  newComment,
-  post = false,
-  data,
-}: TweetListProps) {
-
-  const { comments, loadNextPage, isLoading, hasMore } = data
+export default function SnapList(
+  {
+    author,
+    permlink,
+    setConversation,
+    onOpen,
+    setReply,
+    newComment,
+    post,
+    data
+}: SnapListProps) {  const { comments, loadNextPage, isLoading, hasMore } = data
 
   comments.sort((a: ExtendedComment, b: ExtendedComment) => {
     return new Date(b.created).getTime() - new Date(a.created).getTime();
@@ -71,9 +69,9 @@ export default function TweetList(
             scrollableTarget="scrollableDiv"
         >
           <VStack spacing={1} align="stretch" mx="auto">
-          <TweetComposer pa={author} pp={permlink} onNewComment={handleNewComment} onClose={() => null} />
+          <SnapComposer pa={author} pp={permlink} onNewComment={handleNewComment} onClose={() => null} />
           {comments.map((comment: ExtendedComment) => (
-            <Tweet
+            <Snap
               key={comment.permlink}
               comment={comment}
               onOpen={onOpen}

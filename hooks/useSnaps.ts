@@ -111,12 +111,20 @@ export const useSnaps = () => {
     fetchPosts();
   }, [currentPage]);
 
-  // Load the next page
-  const loadNextPage = () => {
-    if (!isLoading && hasMore) {
-      setCurrentPage((prevPage) => prevPage + 1);
-    }
-  };
+  // Load the next page with throttling
+  const loadNextPage = (() => {
+    let isThrottled = false;
+    return () => {
+      if (!isLoading && hasMore && !isThrottled) {
+        isThrottled = true;
+        setCurrentPage((prevPage) => prevPage + 1);
+        // Throttle for 1 second
+        setTimeout(() => {
+          isThrottled = false;
+        }, 1000);
+      }
+    };
+  })();
 
   return { comments, isLoading, loadNextPage, hasMore, currentPage };
 };

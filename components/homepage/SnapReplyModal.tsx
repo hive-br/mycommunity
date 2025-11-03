@@ -1,19 +1,19 @@
 import { Modal, ModalBody, ModalContent, ModalHeader, ModalOverlay, HStack, Avatar, Link, IconButton, Box, Text } from '@chakra-ui/react';
 import React from 'react';
-import TweetComposer from './TweetComposer';
+import SnapComposer from './SnapComposer';
 import { Comment } from '@hiveio/dhive';
 import { CloseIcon } from '@chakra-ui/icons';
 import markdownRenderer from '@/lib/utils/MarkdownRenderer';
 import { getPostDate } from '@/lib/utils/GetPostDate';
 
-interface TweetReplyModalProps {
+interface SnapReplyModalProps {
     isOpen: boolean;
     onClose: () => void;
     comment?: Comment;
     onNewReply: (newComment: Partial<Comment>) => void;
 }
 
-export default function TweetReplyModal({ isOpen, onClose, comment, onNewReply }: TweetReplyModalProps) {
+export default function SnapReplyModal({ isOpen, onClose, comment, onNewReply }: SnapReplyModalProps) {
 
     if (!comment) {
         return <div></div>;
@@ -50,7 +50,7 @@ export default function TweetReplyModal({ isOpen, onClose, comment, onNewReply }
                 </ModalHeader>
                 <ModalBody>
                     <Box dangerouslySetInnerHTML={{ __html: markdownRenderer(comment.body) }} pb={6} />
-                    <TweetComposer pa={comment.author} pp={comment.permlink} onNewComment={onNewReply} post={true} onClose={onClose} />
+                    <SnapComposer pa={comment.author} pp={comment.permlink} onNewComment={onNewReply} post={true} onClose={onClose} />
                 </ModalBody>
             </ModalContent>
         </Modal>

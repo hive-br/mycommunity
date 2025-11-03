@@ -1,17 +1,50 @@
+
+
 import { DefaultRenderer } from "@hiveio/content-renderer";
+
+function transformIPFSContent(content: string): string {
+    const regex = /<iframe src="https:\/\/ipfs\.skatehive\.app\/ipfs\/([a-zA-Z0-9-?=&]+)"(?:(?!<\/iframe>).)*\sallowfullscreen><\/iframe>/g;
+  
+    return content.replace(regex, (match, videoID) => {
+      return `<video controls muted preload="none" loading="lazy"> 
+                  <source src="https://ipfs.skatehive.app/ipfs/${videoID}" type="video/mp4">
+              </video>`;
+    });
+}
+
+function preventIPFSDownloads(content: string): string {
+    // Find links to IPFS content and add target="_blank" and safety attributes
+    // This prevents the browser from trying to navigate to/download IPFS files
+    return content.replace(
+        /<a href="(https?:\/\/[^"]*(?:ipfs|bafy|Qm)[^"]*)"([^>]*)>/gi,
+        '<a href="$1" target="_blank" rel="noopener noreferrer"$2 onclick="event.preventDefault(); window.open(this.href, \'_blank\'); return false;">'
+    );
+}
 
 export default function markdownRenderer(markdown: string) {
 
     const renderer = new DefaultRenderer({
         baseUrl: "https://hive.blog/",
         breaks: true,
-        skipSanitization: false,
+        skipSanitization: true, // Allow HTML tags like <u>, <ins> for formatting
         allowInsecureScriptTags: false,
         addNofollowToLinks: true,
         doNotShowImages: false,
         assetsWidth: 540,
         assetsHeight: 380,
-        imageProxyFn: (url: string) => url,
+        imageProxyFn: (url: string) => {
+            // Add error handling and caching for images
+            try {
+                // Use a more reliable image proxy or fallback
+                if (url.includes('ipfs')) {
+                    return `https://ipfs.io/ipfs/${url.split('/ipfs/')[1]}`;
+                }
+                return url;
+            } catch (error) {
+                console.warn('Image proxy error:', error);
+                return url;
+            }
+        },
         usertagUrlFn: (account: string) => "/@" + account,
         hashtagUrlFn: (hashtag: string) => "/trending/" + hashtag,
         isLinkSafeFn: (url: string) => true,
@@ -19,18 +52,13 @@ export default function markdownRenderer(markdown: string) {
         ipfsPrefix: "https://ipfs.skatehive.app" // IPFS gateway to display ipfs images
     });
 
-    const safeHtmlStr = renderer.render(markdown);
+    let safeHtmlStr = renderer.render(markdown);
+    
+    // Transform IPFS iframes to video tags
+    safeHtmlStr = transformIPFSContent(safeHtmlStr);
+    
+    // Prevent direct IPFS links from triggering downloads
+    safeHtmlStr = preventIPFSDownloads(safeHtmlStr);
 
     return  safeHtmlStr
 }
-
-function transformIPFSContent(content: string): string {
-    const regex = /<iframe src="https:\/\/ipfs\.skatehive\.app\/ipfs\/([a-zA-Z0-9-?=&]+)"(?:(?!<\/iframe>).)*\sallowfullscreen><\/iframe>/g;
-  
-    return content.replace(regex, (match, videoID) => {
-      return `<video controls muted loop> 
-                  <source src="https://ipfs.skatehive.app/ipfs/${videoID}" type="video/mp4">
-                  <source src="https://ipfs.skatehive.app/ipfs/${videoID}" type="video/quicktime">
-              </video>`;
-    });
-  }

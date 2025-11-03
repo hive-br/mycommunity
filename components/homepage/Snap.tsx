@@ -3,12 +3,14 @@ import { Comment } from '@hiveio/dhive';
 import { ExtendedComment } from '@/hooks/useComments';
 import { FaRegComment, FaRegHeart, FaShare, FaHeart } from "react-icons/fa";
 import { useAioha } from '@aioha/react-ui';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { getPayoutValue } from '@/lib/hive/client-functions';
-import markdownRenderer from '@/lib/utils/MarkdownRenderer';
 import { getPostDate } from '@/lib/utils/GetPostDate';
+import { separateContent } from '@/lib/utils/snapUtils';
+import MediaRenderer from '@/components/shared/MediaRenderer';
+import markdownRenderer from '@/lib/utils/MarkdownRenderer';
 
-interface TweetProps {
+interface SnapProps {
     comment: ExtendedComment;
     onOpen: () => void;
     setReply: (comment: Comment) => void;
@@ -16,12 +18,24 @@ interface TweetProps {
     level?: number; // Added level for indentation
 }
 
-const Tweet = ({ comment, onOpen, setReply, setConversation, level = 0 }: TweetProps) => {
+const Snap = ({ comment, onOpen, setReply, setConversation, level = 0 }: SnapProps) => {
     const commentDate = getPostDate(comment.created);
     const { aioha, user } = useAioha();
     const [voted, setVoted] = useState(comment.active_votes?.some(item => item.voter === user))
     const [sliderValue, setSliderValue] = useState(5);
     const [showSlider, setShowSlider] = useState(false);
+
+    // Separate media from text using SkateHive's pattern
+    const { text, media } = useMemo(
+        () => separateContent(comment.body),
+        [comment.body]
+    );
+
+    // Render text as HTML using markdown renderer
+    const renderedText = useMemo(
+        () => text ? markdownRenderer(text) : '',
+        [text]
+    );
 
     const replies = comment.replies;
 
@@ -55,7 +69,11 @@ const Tweet = ({ comment, onOpen, setReply, setConversation, level = 0 }: TweetP
                 width="100%"
             >
                 <HStack mb={2}>
-                    <Avatar size="sm" name={comment.author} src={`https://images.hive.blog/u/${comment.author}/avatar/sm`} />
+                    <Avatar 
+                        size="sm" 
+                        name={comment.author} 
+                        src={`https://images.hive.blog/u/${comment.author}/avatar/sm`}
+                    />
                     <Box ml={3}>
                         <Text fontWeight="medium" fontSize="sm">
                             <Link href={`/@${comment.author}`}>@{comment.author}</Link>
@@ -65,7 +83,21 @@ const Tweet = ({ comment, onOpen, setReply, setConversation, level = 0 }: TweetP
                         </Text>
                     </Box>
                 </HStack>
-                <Box dangerouslySetInnerHTML={{ __html: markdownRenderer(comment.body) }} />
+                
+                {/* Render media separately using MediaRenderer */}
+                {media && <MediaRenderer mediaContent={media} />}
+                
+                {/* Render text content with proper markdown processing */}
+                {renderedText && (
+                    <Box 
+                        dangerouslySetInnerHTML={{ __html: renderedText }}
+                        sx={{
+                            "& p": { marginBottom: 2 },
+                            "& a": { color: "primary", textDecoration: "underline" }
+                        }}
+                    />
+                )}
+                
                 {showSlider ? (
                 <Flex mt={4} alignItems="center">
                     <Box width="100%" mr={2}>
@@ -109,7 +141,7 @@ const Tweet = ({ comment, onOpen, setReply, setConversation, level = 0 }: TweetP
             {replies && replies.length > 0 && (
                 <VStack spacing={2} align="stretch" mt={2}>
                     {replies.map((reply: Comment) => (
-                        <Tweet
+                        <Snap
                             key={reply.permlink}
                             comment={reply}
                             onOpen={onOpen}
@@ -124,4 +156,4 @@ const Tweet = ({ comment, onOpen, setReply, setConversation, level = 0 }: TweetP
     );
 };
 
-export default Tweet;
+export default Snap;

@@ -1,0 +1,249 @@
+import { Discussion } from "@hiveio/dhive";
+
+export interface MediaItem {
+  type: "image" | "video" | "iframe";
+  content: string;
+  src?: string;
+}
+
+/**
+ * Separate content into media and text parts
+ * This is the foundation of SkateHive's media/text separation pattern
+ */
+export const separateContent = (body: string) => {
+  // First remove the last URL if it's at the end of the content
+  const cleanedBody = removeLastUrlFromContent(body);
+  
+  const textParts: string[] = [];
+  const mediaParts: string[] = [];
+  const lines = cleanedBody.split("\n");
+  
+  lines.forEach((line: string) => {
+    // Check if line contains markdown image or iframe
+    if (line.match(/!\[.*?\]\(.*\)/) || line.match(/<iframe.*<\/iframe>/)) {
+      mediaParts.push(line);
+    } else {
+      textParts.push(line);
+    }
+  });
+  
+  return { text: textParts.join("\n"), media: mediaParts.join("\n") };
+};
+
+/**
+ * Remove the last URL from content if it's at the end
+ * This prevents duplicate rendering of OpenGraph previews
+ */
+const removeLastUrlFromContent = (content: string): string => {
+  const lastUrl = extractLastUrl(content);
+  
+  if (!lastUrl) {
+    return content;
+  }
+  
+  // Find the position of the last URL
+  const urlPosition = content.lastIndexOf(lastUrl);
+  const afterUrl = content.substring(urlPosition + lastUrl.length).trim();
+  
+  // Only remove if it's at the end with minimal trailing content
+  if (afterUrl === '' || afterUrl.match(/^[\s\n.!?]*$/)) {
+    return content.substring(0, urlPosition).trim();
+  }
+  
+  return content;
+};
+
+/**
+ * Extract the last URL from content for OpenGraph preview
+ */
+export const extractLastUrl = (content: string): string | null => {
+  const urlRegex = /https?:\/\/[^\s<>"'`]+/g;
+  const urls: string[] = [];
+  let match;
+  
+  while ((match = urlRegex.exec(content)) !== null) {
+    let url = match[0];
+    // Remove trailing ) if present (from markdown syntax)
+    url = url.replace(/\)+$/, '');
+    
+    // Skip if it's already handled by other systems
+    if (
+      // Skip image URLs
+      url.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i) ||
+      // Skip video URLs
+      url.match(/\.(mp4|webm|mov|avi|wmv|flv|mkv)$/i) ||
+      // Skip YouTube URLs (handled by markdown processor)
+      url.includes('youtube.com') ||
+      url.includes('youtu.be') ||
+      // Skip 3speak URLs
+      url.includes('3speak.tv') ||
+      // Skip Vimeo URLs
+      url.includes('vimeo.com') ||
+      // Skip Odysee URLs
+      url.includes('odysee.com') ||
+      // Skip IPFS URLs (handled as media)
+      url.includes('/ipfs/') ||
+      // Skip Instagram URLs (handled by markdown processor)
+      url.includes('instagram.com')
+    ) {
+      continue;
+    }
+    
+    urls.push(url);
+  }
+  
+  return urls.length > 0 ? urls[urls.length - 1] : null;
+};
+
+/**
+ * Check if a URL is a video file based on extension
+ */
+const isVideoUrl = (url: string): boolean => {
+  const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.wmv', '.flv', '.mkv', '.m4v'];
+  const lowercaseUrl = url.toLowerCase();
+  return videoExtensions.some(ext => lowercaseUrl.includes(ext));
+};
+
+/**
+ * Detect IPFS URLs from various gateways
+ */
+const isIpfsUrl = (url: string): boolean => {
+  return (
+    url.includes('/ipfs/') || 
+    url.includes('ipfs.') ||
+    url.includes('.ipfs.') ||
+    url.startsWith('ipfs://')
+  );
+};
+
+/**
+ * Convert any IPFS gateway URL to skatehive gateway for consistency
+ */
+const convertToSkatehiveGateway = (url: string): string => {
+  // Extract IPFS hash (bafy... or Qm...)
+  const ipfsHashMatch = url.match(/(bafy[0-9a-z]{50,}|Qm[1-9A-HJ-NP-Za-km-z]{44,})/);
+  const hash = ipfsHashMatch ? ipfsHashMatch[1] : null;
+  
+  return hash ? `https://ipfs.skatehive.app/ipfs/${hash}` : url;
+};
+
+/**
+ * Parse media content and return array of MediaItem objects
+ * This handles markdown images, iframes, IPFS URLs
+ */
+export const parseMediaContent = (mediaContent: string): MediaItem[] => {
+  const mediaItems: MediaItem[] = [];
+
+  mediaContent.split("\n").forEach((item: string) => {
+    const trimmedItem = item.trim();
+    if (!trimmedItem) return;
+
+    // Handle markdown images/videos with any IPFS gateway
+    if (trimmedItem.includes("![") && trimmedItem.includes("http")) {
+      // Extract ALL image markdown patterns from the line (there might be multiple or text before/after)
+      const imageRegex = /!\[.*?\]\((https?:\/\/[^)]+)\)/g;
+      let match;
+      
+      while ((match = imageRegex.exec(trimmedItem)) !== null) {
+        const url = match[1];
+        const fullMatch = match[0]; // The complete ![...](url) pattern
+        
+        // Check if it's an IPFS URL
+        if (isIpfsUrl(url)) {
+          // Convert to skatehive gateway for consistency
+          const skatehiveUrl = convertToSkatehiveGateway(url);
+          
+          // Check if it's a video based on URL or assume video for IPFS without clear extension
+          if (isVideoUrl(url)) {
+            mediaItems.push({
+              type: "video",
+              content: fullMatch,
+              src: skatehiveUrl,
+            });
+          } else {
+            // For IPFS URLs without clear video extension, we could check content-type
+            // For now, treat as image but this could be enhanced
+            mediaItems.push({
+              type: "image",
+              content: fullMatch,
+            });
+          }
+        } else {
+          // Handle non-IPFS URLs
+          if (isVideoUrl(url)) {
+            mediaItems.push({
+              type: "video",
+              content: fullMatch,
+              src: url,
+            });
+          } else {
+            mediaItems.push({
+              type: "image",
+              content: fullMatch,
+            });
+          }
+        }
+      }
+      return;
+    }
+
+    // Handle markdown images/videos with ipfs: protocol
+    if (trimmedItem.includes("![") && trimmedItem.includes("ipfs:")) {
+      const urlMatch = trimmedItem.match(/!\[.*?\]\((.*?)\)/);
+      if (urlMatch && urlMatch[1]) {
+        const url = urlMatch[1];
+        if (isVideoUrl(url)) {
+          mediaItems.push({
+            type: "video",
+            content: trimmedItem,
+            src: url,
+          });
+        } else {
+          mediaItems.push({
+            type: "image",
+            content: trimmedItem,
+          });
+        }
+        return;
+      }
+    }
+
+    // Handle iframes
+    if (trimmedItem.includes("<iframe") && trimmedItem.includes("</iframe>")) {
+      const srcMatch = trimmedItem.match(/src=["']([^"']+)["']/i);
+      if (srcMatch && srcMatch[1]) {
+        const url = srcMatch[1];
+
+        // Skip YouTube iframes (handled by auto-embed logic)
+        if (
+          url.includes("youtube.com/embed/") ||
+          url.includes("youtube-nocookie.com/embed/") ||
+          url.includes("youtu.be/")
+        ) {
+          return;
+        }
+
+        // CRITICAL FIX: Treat ALL IPFS iframes as videos (even without extensions)
+        // This prevents network spikes from IPFS content loading immediately
+        if (isIpfsUrl(url)) {
+          const skatehiveUrl = convertToSkatehiveGateway(url);
+          mediaItems.push({
+            type: "video",
+            content: trimmedItem,
+            src: skatehiveUrl,
+          });
+          return; // Always treat IPFS iframes as videos for lazy loading
+        }
+
+        // Other iframe embeds (non-IPFS)
+        mediaItems.push({
+          type: "iframe",
+          content: trimmedItem,
+          src: url,
+        });
+      }
+    }
+  });
+
+  return mediaItems;
+};

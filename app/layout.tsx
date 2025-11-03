@@ -12,10 +12,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Providers>
           <Box bg="background" color="text" minH="100vh">
-            <Header />
-            <Flex direction={{ base: 'column', md: 'row' }}>
+            <Flex direction={{ base: 'column', md: 'row' }} h="100vh">
               <Sidebar />
-              <Box flex="1">
+              <Box 
+                flex="1" 
+                ml={{ base: '0', md: '20%' }}
+                h="100vh"
+                overflowY="auto"
+              >
                 {children}
               </Box>
             </Flex>

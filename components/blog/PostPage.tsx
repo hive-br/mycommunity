@@ -2,12 +2,12 @@
 'use client';
 
 import { Box, Container, Flex, Spinner } from '@chakra-ui/react';
-import TweetList from '../homepage/TweetList';
-import TweetComposer from '../homepage/TweetComposer';
+import SnapList from '../homepage/SnapList';
+import SnapComposer from '../homepage/SnapComposer';
 import { useEffect, useState } from 'react';
 import { Comment, Discussion } from '@hiveio/dhive'; // Ensure this import is consistent
 import Conversation from '../homepage/Conversation';
-import TweetReplyModal from '../homepage/TweetReplyModal';
+import SnapReplyModal from '../homepage/SnapReplyModal';
 import { getPost } from '@/lib/hive/client-functions';
 import PostDetails from '@/components/blog/PostDetails';
 import { useComments } from '@/hooks/useComments';
@@ -73,14 +73,14 @@ export default function PostPage({ author, permlink }: PostPageProps) {
             <PostDetails post={post} />
             {!conversation ? (
               <>
-                <TweetComposer pa={author} pp={permlink} onNewComment={handleNewComment} post={true} onClose={() => {}} />
-                <TweetList
+                <SnapComposer pa={author} pp={permlink} onNewComment={handleNewComment} post={true} onClose={() => {}} />
+                <SnapList
                   author={author}
                   permlink={permlink}
                   setConversation={setConversation}
                   onOpen={onOpen}
                   setReply={setReply}
-                  newComment={newComment} // Pass the newComment to TweetList
+                  newComment={newComment} // Pass the newComment to SnapList
                   post={true}
                   data={commentsData}
                 />
@@ -91,7 +91,7 @@ export default function PostPage({ author, permlink }: PostPageProps) {
           </Container>
         </Box>
       </Flex>
-      {isOpen && <TweetReplyModal isOpen={isOpen} onClose={onClose} comment={reply} onNewReply={handleNewComment} />}
+      {isOpen && <SnapReplyModal isOpen={isOpen} onClose={onClose} comment={reply} onNewReply={handleNewComment} />}
     </Box>
   );
 }

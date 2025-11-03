@@ -90,6 +90,10 @@ export default function Sidebar() {
             w={{ base: 'full', md: '20%' }}
             // minH={{ base: 'auto', md: '100vh' }}
             h={"100vh"}
+            position={{ base: 'relative', md: 'fixed' }}
+            left={{ base: 'auto', md: '0' }}
+            top={{ base: 'auto', md: '0' }}
+            zIndex={{ base: 'auto', md: '10' }}
             display={{ base: 'none', md: 'block' }}
             sx={{
                 '&::-webkit-scrollbar': {

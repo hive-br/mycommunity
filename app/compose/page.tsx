@@ -38,22 +38,13 @@ export default function Home() {
   return (
     <Flex
       width="100%"
-      height="90%" 
+      height={{ base: "calc(100vh - 80px)", md: "100vh" }}
       bgColor="white"
       justify="center"
       p="1"
       direction="column"
       overflow="hidden"
     >
-      <Input
-        placeholder="Enter post title"
-        mb="4"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        size="lg"
-        borderRadius="base"
-      />
-
       {/* Editor */}
       <Flex
         flex="1"
@@ -64,42 +55,17 @@ export default function Home() {
         p="1"
         overflow="hidden" // Prevent internal scrolling
       >
-        <Editor markdown={markdown} setMarkdown={setMarkdown} />
-      </Flex>
-
-      {/* Hashtag Input */}
-      <Input
-        placeholder="Enter hashtags"
-        mt="4"
-        value={hashtagInput}
-        onChange={(e) => setHashtagInput(e.target.value)}
-        onKeyDown={handleHashtagKeyDown}
-        borderRadius="base"
-      />
-      {/* Display Hashtags as Tags */}
-      <Wrap mt="2">
-        {hashtags.map((tag, index) => (
-          <WrapItem key={index}>
-            <Tag
-              size="md"
-              borderRadius="base"
-              variant="solid"
-              colorScheme="blue"
-            >
-              <TagLabel>{tag}</TagLabel>
-              <TagCloseButton onClick={() => removeHashtag(index)} />
-            </Tag>
-          </WrapItem>
-        ))}
-      </Wrap>
-      <Flex mt="1" justify="flex-end">
-        <Button
-          size="sm" // Make button smaller
-          colorScheme="blue"
-          onClick={handleSubmit}
-        >
-          Submit
-        </Button>
+        <Editor 
+          markdown={markdown} 
+          setMarkdown={setMarkdown} 
+          title={title} 
+          setTitle={setTitle}
+          hashtagInput={hashtagInput}
+          setHashtagInput={setHashtagInput}
+          hashtags={hashtags}
+          setHashtags={setHashtags}
+          onSubmit={handleSubmit}
+        />
       </Flex>
     </Flex>
   )

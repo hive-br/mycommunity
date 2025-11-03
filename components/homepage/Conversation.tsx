@@ -2,7 +2,7 @@ import { Box, Text, HStack, Button, Avatar, Divider, VStack, Spinner } from '@ch
 import { Comment } from '@hiveio/dhive';
 import { useComments } from '@/hooks/useComments';
 import { ArrowBackIcon } from "@chakra-ui/icons";
-import Tweet from './Tweet';
+import Snap from './Snap';
 
 interface ConversationProps {
     comment: Comment;
@@ -28,7 +28,7 @@ const Conversation = ({ comment, setConversation, onOpen, setReply }: Conversati
         return (
             <Box textAlign="center" mt={4}>
                 <Spinner size="xl" />
-                <Text>Loading tweets...</Text>
+                <Text>Loading snaps...</Text>
             </Box>
         );
     }
@@ -39,12 +39,12 @@ const Conversation = ({ comment, setConversation, onOpen, setReply }: Conversati
                 <Button onClick={onBackClick} variant="ghost" leftIcon={<ArrowBackIcon />}></Button>
                 <Text fontSize="lg" fontWeight="bold">Conversation</Text>
             </HStack>
-            <Tweet comment={comment} onOpen={onOpen} setReply={setReply} />
+            <Snap comment={comment} onOpen={onOpen} setReply={setReply} />
             <Divider my={4} />
             <HStack justify="space-between" mt={3} onClick={handleReplyModal}>
                 <HStack>
                     <Avatar size="sm" name="Your Name" />
-                    <Text>Tweet your reply</Text>
+                    <Text>Snap your reply</Text>
                 </HStack>
                 <Button variant="solid" colorScheme="primary" onClick={handleReplyModal}>
                     Reply
@@ -53,7 +53,7 @@ const Conversation = ({ comment, setConversation, onOpen, setReply }: Conversati
             <Divider my={4} />
             <VStack spacing={2} align="stretch">
                 {replies.map((reply: any) => (
-                    <Tweet key={reply.permlink} comment={reply} onOpen={onOpen} setReply={setReply} />
+                    <Snap key={reply.permlink} comment={reply} onOpen={onOpen} setReply={setReply} />
                 ))}
             </VStack>
         </Box>

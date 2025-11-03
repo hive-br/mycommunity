@@ -1,12 +1,12 @@
 'use client';
 
 import { Container, Flex } from '@chakra-ui/react';
-import TweetList from '@/components/homepage/TweetList';
+import SnapList from '@/components/homepage/SnapList';
 import RightSidebar from '@/components/layout/RightSideBar';
 import { useState } from 'react';
 import { Comment } from '@hiveio/dhive'; // Ensure this import is consistent
 import Conversation from '@/components/homepage/Conversation';
-import TweetReplyModal from '@/components/homepage/TweetReplyModal';
+import SnapReplyModal from '@/components/homepage/SnapReplyModal';
 import { useSnaps } from '@/hooks/useSnaps';
 
 export default function Home() {
@@ -52,7 +52,7 @@ export default function Home() {
         {!conversation ? (
 
 
-          <TweetList
+          <SnapList
             author={thread_author}
             permlink={thread_permlink}
             setConversation={setConversation}
@@ -66,7 +66,7 @@ export default function Home() {
         )}
       </Container>
       <RightSidebar />
-      {isOpen && <TweetReplyModal isOpen={isOpen} onClose={onClose} comment={reply} onNewReply={handleNewComment} />}
+      {isOpen && <SnapReplyModal isOpen={isOpen} onClose={onClose} comment={reply} onNewReply={handleNewComment} />}
     </Flex>
   );
 }

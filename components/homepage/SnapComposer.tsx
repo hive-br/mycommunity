@@ -10,7 +10,7 @@ import { MdGif } from 'react-icons/md';
 import { Comment } from '@hiveio/dhive';
 import { getFileSignature, getLastSnapsContainer, uploadImage } from '@/lib/hive/client-functions';
 
-interface TweetComposerProps {
+interface SnapComposerProps {
     pa: string;
     pp: string;
     onNewComment: (newComment: Partial<Comment>) => void;
@@ -18,7 +18,7 @@ interface TweetComposerProps {
     onClose: () => void;
 }
 
-export default function TweetComposer ({ pa, pp, onNewComment, post = false, onClose }: TweetComposerProps) {
+export default function SnapComposer ({ pa, pp, onNewComment, post = false, onClose }: SnapComposerProps) {
     const { user, aioha } = useAioha();
     const postBodyRef = useRef<HTMLTextAreaElement>(null);
     const [images, setImages] = useState<File[]>([]);

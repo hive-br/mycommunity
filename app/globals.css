@@ -31,3 +31,59 @@ body {
     text-wrap: balance;
   }
 }
+
+/* React Quill Custom Styles */
+.ql-editor {
+  min-height: 300px !important;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.ql-toolbar {
+  border-top: 1px solid #e2e8f0 !important;
+  border-left: 1px solid #e2e8f0 !important;
+  border-right: 1px solid #e2e8f0 !important;
+  border-bottom: none !important;
+  border-radius: 6px 6px 0 0 !important;
+  background: #f8fafc;
+}
+
+.ql-container {
+  border-bottom: 1px solid #e2e8f0 !important;
+  border-left: 1px solid #e2e8f0 !important;
+  border-right: 1px solid #e2e8f0 !important;
+  border-top: none !important;
+  border-radius: 0 0 6px 6px !important;
+  font-family: inherit;
+}
+
+.ql-snow .ql-tooltip {
+  z-index: 1000;
+}
+
+/* Custom Quill editor height */
+.quill-editor-container .quill {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.quill-editor-container .ql-container {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Markdown code editor styles */
+.markdown-editor {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  background-color: #f8f9fa !important;
+  color: #333 !important;
+}
+
+.markdown-editor:focus {
+  background-color: #fff !important;
+  box-shadow: none !important;
+  border: none !important;
+}

@@ -12,7 +12,7 @@ interface GiphySelectorProps {
 
 const GiphySelector: React.FC<GiphySelectorProps> = ({ apiKey, onSelect }) => {
     const gf = new GiphyFetch(apiKey);
-    const [searchTerm, setSearchTerm] = useState('skateboard funny');
+    const [searchTerm, setSearchTerm] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [key, setKey] = useState(0); // Add a key state to force re-render
 

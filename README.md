@@ -182,6 +182,13 @@ Create a `.env.local` file in the root directory with these variables:
 
 ### Optional Variables
 
+#### `NEXT_PUBLIC_DISPLAY_CURRENCY`
+**What it does**: Shows post payouts in your preferred currency instead of HBD/USD  
+**Options**: Leave empty for HBD/USD, or use: `BRL`, `EUR`, `GBP`, `JPY`, `AUD`, `CAD`, `CHF`, `CNY`, `INR`  
+**Example**: `NEXT_PUBLIC_DISPLAY_CURRENCY=BRL` (for Brazilian Reals)  
+**Default**: Empty (displays as HBD/USD with $ symbol)  
+**Note**: Exchange rates are cached for 6 hours to minimize API calls. HBD is treated as $1 USD when no currency is specified.
+
 #### `HIVE_POSTING_KEY`
 **What it does**: needed for signing the image files to upload to hive.blog
 **Example**: `HIVE_POSTING_KEY=5JxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxQ`  

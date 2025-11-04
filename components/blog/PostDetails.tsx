@@ -4,8 +4,8 @@ import { Discussion } from '@hiveio/dhive';
 import { FaHeart, FaComment, FaRegHeart } from 'react-icons/fa';
 import { getPostDate } from '@/lib/utils/GetPostDate';
 import { useAioha } from '@aioha/react-ui';
-import { getPayoutValue } from '@/lib/hive/client-functions';
 import markdownRenderer from '@/lib/utils/MarkdownRenderer';
+import { useCurrencyDisplay } from '@/hooks/useCurrencyDisplay';
 
 interface PostDetailsProps {
     post: Discussion;
@@ -18,6 +18,7 @@ export default function PostDetails({ post }: PostDetailsProps) {
     const [sliderValue, setSliderValue] = useState(100);
     const [showSlider, setShowSlider] = useState(false);
     const [voted, setVoted] = useState(post.active_votes?.some(item => item.voter === user));
+    const payoutDisplay = useCurrencyDisplay(post);
 
     function handleHeartClick() {
         setShowSlider(!showSlider);
@@ -82,7 +83,7 @@ export default function PostDetails({ post }: PostDetailsProps) {
                         <Text ml={2} fontSize="sm">{post.children}</Text>
                     </Flex>
                     <Text fontWeight="bold" fontSize="sm">
-                        ${getPayoutValue(post)}
+                        {payoutDisplay}
                     </Text>
                 </Flex>
             )}

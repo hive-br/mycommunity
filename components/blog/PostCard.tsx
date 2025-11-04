@@ -10,7 +10,7 @@ import { FaHeart, FaComment, FaRegHeart } from 'react-icons/fa';
 import { getPostDate } from '@/lib/utils/GetPostDate';
 import { useAioha } from '@aioha/react-ui';
 import { useRouter } from 'next/navigation';
-import { getPayoutValue } from '@/lib/hive/client-functions';
+import { useCurrencyDisplay } from '@/hooks/useCurrencyDisplay';
 
 interface PostCardProps {
     post: Discussion;
@@ -26,6 +26,7 @@ export default function PostCard({ post }: PostCardProps) {
     const { aioha, user } = useAioha();
     const [voted, setVoted] = useState(post.active_votes?.some(item => item.voter === user));
     const router = useRouter();
+    const payoutDisplay = useCurrencyDisplay(post);
 
     // **State to control how many images to show initially**
     const [visibleImages, setVisibleImages] = useState<number>(3); // Start with 3 images
@@ -177,7 +178,7 @@ export default function PostCard({ post }: PostCardProps) {
                             </Text>
                         </Flex>
                         <Text fontWeight="bold" fontSize="sm">
-                            ${getPayoutValue(post)}
+                            {payoutDisplay}
                         </Text>
                     </Flex>
                 )}

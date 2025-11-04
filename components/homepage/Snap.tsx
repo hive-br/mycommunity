@@ -4,12 +4,12 @@ import { ExtendedComment } from '@/hooks/useComments';
 import { FaRegComment, FaRegHeart, FaShare, FaHeart } from "react-icons/fa";
 import { useAioha } from '@aioha/react-ui';
 import { useState, useMemo } from 'react';
-import { getPayoutValue } from '@/lib/hive/client-functions';
 import { getPostDate } from '@/lib/utils/GetPostDate';
 import { separateContent, extractHivePostUrls } from '@/lib/utils/snapUtils';
 import MediaRenderer from '@/components/shared/MediaRenderer';
 import HivePostPreview from '@/components/shared/HivePostPreview';
 import markdownRenderer from '@/lib/utils/MarkdownRenderer';
+import { useCurrencyDisplay } from '@/hooks/useCurrencyDisplay';
 
 interface SnapProps {
     comment: ExtendedComment;
@@ -25,6 +25,7 @@ const Snap = ({ comment, onOpen, setReply, setConversation, level = 0 }: SnapPro
     const [voted, setVoted] = useState(comment.active_votes?.some(item => item.voter === user))
     const [sliderValue, setSliderValue] = useState(5);
     const [showSlider, setShowSlider] = useState(false);
+    const payoutDisplay = useCurrencyDisplay(comment);
 
     // Extract Hive post URLs for preview cards
     const hivePostUrls = useMemo(
@@ -168,7 +169,7 @@ const Snap = ({ comment, onOpen, setReply, setConversation, level = 0 }: SnapPro
                         )}
                     </HStack>
                     <Text fontWeight="bold" fontSize="sm">
-                    ${getPayoutValue(comment)}
+                        {payoutDisplay}
                     </Text>
                 </HStack>
             )}

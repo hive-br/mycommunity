@@ -33,7 +33,7 @@ export default function FeedTabFilter({
       py={3}
       w="full"
     >
-      <HStack spacing={2} justify="space-between" w="full" px={4}>
+      <HStack spacing={2} justify="space-between" w="full" px={2}>
         {tabs.map((tab) => {
           const isDisabled = tab.requiresAuth && !isLoggedIn;
           const isActive = activeFilter === tab.value;

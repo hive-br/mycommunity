@@ -11,12 +11,10 @@ export interface MediaItem {
  * This is the foundation of SkateHive's media/text separation pattern
  */
 export const separateContent = (body: string) => {
-  // First remove the last URL if it's at the end of the content
-  const cleanedBody = removeLastUrlFromContent(body);
-  
+  // Don't remove URLs - let them be rendered as clickable links
   const textParts: string[] = [];
   const mediaParts: string[] = [];
-  const lines = cleanedBody.split("\n");
+  const lines = body.split("\n");
   
   lines.forEach((line: string) => {
     // Check if line contains markdown image or iframe
@@ -51,6 +49,45 @@ const removeLastUrlFromContent = (content: string): string => {
   }
   
   return content;
+};
+
+/**
+ * Extract Hive post URLs from content and return author/permlink pairs
+ */
+export const extractHivePostUrls = (content: string): Array<{ url: string; author: string; permlink: string }> => {
+  const hiveFrontends = [
+    'peakd.com',
+    'ecency.com',
+    'hive.blog',
+    'hiveblog.io',
+    'leofinance.io',
+    '3speak.tv',
+    'd.tube',
+    'esteem.app',
+    'busy.org'
+  ];
+  
+  const results: Array<{ url: string; author: string; permlink: string }> = [];
+  
+  // Create pattern for all frontends
+  const frontendsPattern = hiveFrontends.map(domain => domain.replace('.', '\\.')).join('|');
+  
+  // Match Hive post URLs: https://frontend.com/category/@author/permlink or https://frontend.com/@author/permlink
+  const hiveUrlRegex = new RegExp(
+    `https?:\\/\\/(${frontendsPattern})\\/((?:[^/\\s]+\\/)?@([a-z0-9.-]+)\\/([a-z0-9-]+))`,
+    'gi'
+  );
+  
+  let match;
+  while ((match = hiveUrlRegex.exec(content)) !== null) {
+    const url = match[0];
+    const author = match[3];
+    const permlink = match[4];
+    
+    results.push({ url, author, permlink });
+  }
+  
+  return results;
 };
 
 /**

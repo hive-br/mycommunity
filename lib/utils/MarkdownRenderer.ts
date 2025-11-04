@@ -21,6 +21,36 @@ function preventIPFSDownloads(content: string): string {
     );
 }
 
+function convertHiveUrlsToInternal(content: string): string {
+    // List of known Hive frontends
+    const hiveFrontends = [
+        'peakd.com',
+        'ecency.com',
+        'hive.blog',
+        'hiveblog.io',
+        'leofinance.io',
+        '3speak.tv',
+        'd.tube',
+        'esteem.app',
+        'busy.org'
+    ];
+    
+    // Create regex pattern for all frontends
+    const frontendsPattern = hiveFrontends.map(domain => domain.replace('.', '\\.')).join('|');
+    
+    // Match Hive post URLs: https://frontend.com/category/@author/permlink or https://frontend.com/@author/permlink
+    const hiveUrlRegex = new RegExp(
+        `<a href="https?:\\/\\/(${frontendsPattern})\\/((?:[^/]+\\/)?@([a-z0-9.-]+)\\/([a-z0-9-]+))"([^>]*)>`,
+        'gi'
+    );
+    
+    return content.replace(hiveUrlRegex, (match, frontend, fullPath, author, permlink, attributes) => {
+        // Convert to internal link format: /@author/permlink
+        const internalUrl = `/@${author}/${permlink}`;
+        return `<a href="${internalUrl}"${attributes}>`;
+    });
+}
+
 export default function markdownRenderer(markdown: string) {
 
     const renderer = new DefaultRenderer({
@@ -59,6 +89,9 @@ export default function markdownRenderer(markdown: string) {
     
     // Prevent direct IPFS links from triggering downloads
     safeHtmlStr = preventIPFSDownloads(safeHtmlStr);
+    
+    // Convert Hive frontend URLs to internal links
+    safeHtmlStr = convertHiveUrlsToInternal(safeHtmlStr);
 
     return  safeHtmlStr
 }

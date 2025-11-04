@@ -6,8 +6,9 @@ import { useAioha } from '@aioha/react-ui';
 import { useState, useMemo } from 'react';
 import { getPayoutValue } from '@/lib/hive/client-functions';
 import { getPostDate } from '@/lib/utils/GetPostDate';
-import { separateContent } from '@/lib/utils/snapUtils';
+import { separateContent, extractHivePostUrls } from '@/lib/utils/snapUtils';
 import MediaRenderer from '@/components/shared/MediaRenderer';
+import HivePostPreview from '@/components/shared/HivePostPreview';
 import markdownRenderer from '@/lib/utils/MarkdownRenderer';
 
 interface SnapProps {
@@ -25,16 +26,31 @@ const Snap = ({ comment, onOpen, setReply, setConversation, level = 0 }: SnapPro
     const [sliderValue, setSliderValue] = useState(5);
     const [showSlider, setShowSlider] = useState(false);
 
+    // Extract Hive post URLs for preview cards
+    const hivePostUrls = useMemo(
+        () => extractHivePostUrls(comment.body),
+        [comment.body]
+    );
+
     // Separate media from text using SkateHive's pattern
     const { text, media } = useMemo(
         () => separateContent(comment.body),
         [comment.body]
     );
 
+    // Remove Hive post URLs from text since we'll render them as preview cards
+    const textWithoutHiveUrls = useMemo(() => {
+        let cleanText = text;
+        hivePostUrls.forEach(({ url }) => {
+            cleanText = cleanText.replace(url, '');
+        });
+        return cleanText.trim();
+    }, [text, hivePostUrls]);
+
     // Render text as HTML using markdown renderer
     const renderedText = useMemo(
-        () => text ? markdownRenderer(text) : '',
-        [text]
+        () => textWithoutHiveUrls ? markdownRenderer(textWithoutHiveUrls) : '',
+        [textWithoutHiveUrls]
     );
 
     const replies = comment.replies;
@@ -93,9 +109,29 @@ const Snap = ({ comment, onOpen, setReply, setConversation, level = 0 }: SnapPro
                         dangerouslySetInnerHTML={{ __html: renderedText }}
                         sx={{
                             "& p": { marginBottom: 2 },
-                            "& a": { color: "primary", textDecoration: "underline" }
+                            "& a": { 
+                                color: "primary", 
+                                textDecoration: "underline",
+                                cursor: "pointer",
+                                _hover: {
+                                    color: "accent"
+                                }
+                            }
                         }}
                     />
+                )}
+
+                {/* Render Hive post preview cards */}
+                {hivePostUrls.length > 0 && (
+                    <VStack spacing={2} align="stretch" mt={2}>
+                        {hivePostUrls.map(({ author, permlink }, index) => (
+                            <HivePostPreview
+                                key={`${author}-${permlink}-${index}`}
+                                author={author}
+                                permlink={permlink}
+                            />
+                        ))}
+                    </VStack>
                 )}
                 
                 {showSlider ? (

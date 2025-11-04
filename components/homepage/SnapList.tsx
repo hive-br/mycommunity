@@ -68,7 +68,7 @@ export default function SnapList(
                 )}
             scrollableTarget="scrollableDiv"
         >
-          <VStack spacing={1} align="stretch" mx="auto">
+          <VStack spacing={1} align="stretch" mx="auto" pt={0} px={2}>
           <SnapComposer pa={author} pp={permlink} onNewComment={handleNewComment} onClose={() => null} />
           {comments.map((comment: ExtendedComment) => (
             <Snap

@@ -17,6 +17,7 @@ import { windows95Theme } from '@/themes/windows95'
 import { hiveBRTheme } from '@/themes/hivebr'
 import { cannabisTheme } from '@/themes/cannabis'
 import { mengaoTheme } from '@/themes/mengao'
+import { UserProvider } from '@/contexts/UserContext'
 
 const aioha = new Aioha()
 
@@ -50,7 +51,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ChakraProvider theme={selectedTheme}>
       <AiohaProvider aioha={aioha}>
-        {children}
+        <UserProvider>
+          {children}
+        </UserProvider>
       </AiohaProvider>
     </ChakraProvider>
   )

@@ -39,7 +39,7 @@ export default function Home() {
     <Flex
       width="100%"
       height={{ base: "calc(100vh - 80px)", md: "100vh" }}
-      bgColor="white"
+      bg="background"
       justify="center"
       p="1"
       direction="column"
@@ -49,7 +49,7 @@ export default function Home() {
       <Flex
         flex="1"
         border="1px solid"
-        borderColor="black"
+        borderColor="border"
         borderRadius="base"
         justify="center"
         p="1"

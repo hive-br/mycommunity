@@ -330,9 +330,9 @@ const Editor: FC<EditorProps> = ({ markdown, setMarkdown, title, setTitle, hasht
                         {/* Title Input */}
                         <Box
                             border="1px solid"
-                            borderColor="gray.200"
+                            borderColor="border"
                             borderRadius="md"
-                            bg="white"
+                            bg="muted"
                         >
                             <Input
                                 placeholder="Enter post title"
@@ -345,7 +345,10 @@ const Editor: FC<EditorProps> = ({ markdown, setMarkdown, title, setTitle, hasht
                                 fontSize="lg"
                                 px={3}
                                 py={2}
-                                _focus={{ boxShadow: 'none', borderColor: 'blue.500' }}
+                                bg="muted"
+                                color="text"
+                                _focus={{ boxShadow: 'none', borderColor: 'primary' }}
+                                _placeholder={{ color: 'gray.500' }}
                             />
                         </Box>
                         
@@ -353,18 +356,18 @@ const Editor: FC<EditorProps> = ({ markdown, setMarkdown, title, setTitle, hasht
                         <Box 
                             h="100%"
                             border="1px solid"
-                            borderColor="gray.200"
+                            borderColor="border"
                             borderRadius="md"
                             display="flex"
                             flexDirection="column"
-                            bg="white"
+                            bg="muted"
                     >
                         <Box 
-                            bg="gray.50" 
+                            bg="muted" 
                             px={3} 
                             py={2} 
                             borderBottom="1px solid" 
-                            borderColor="gray.200"
+                            borderColor="border"
                             display="flex"
                             alignItems="center"
                             gap={0.5}
@@ -539,17 +542,20 @@ const Editor: FC<EditorProps> = ({ markdown, setMarkdown, title, setTitle, hasht
                             fontFamily="mono"
                             fontSize="sm"
                             p={4}
+                            bg="muted"
+                            color="text"
                             overflowY="auto"
                             _focus={{ boxShadow: 'none' }}
+                            _placeholder={{ color: 'gray.500' }}
                         />
                         </Box>
                         
                         {/* Hashtag Section */}
                         <Box
                             border="1px solid"
-                            borderColor="gray.200"
+                            borderColor="border"
                             borderRadius="md"
-                            bg="white"
+                            bg="muted"
                         >
                             {/* Hashtag Input */}
                             <Input
@@ -562,12 +568,15 @@ const Editor: FC<EditorProps> = ({ markdown, setMarkdown, title, setTitle, hasht
                                 borderRadius="md"
                                 px={4}
                                 py={2}
-                                _focus={{ boxShadow: 'none', borderColor: 'blue.500' }}
+                                bg="muted"
+                                color="text"
+                                _focus={{ boxShadow: 'none', borderColor: 'primary' }}
+                                _placeholder={{ color: 'gray.500' }}
                             />
                             
                             {/* Display Hashtags as Tags */}
                             {hashtags.length > 0 && (
-                                <Wrap p={3} spacing={2} borderTop="1px solid" borderColor="gray.200">
+                                <Wrap p={3} spacing={2} borderTop="1px solid" borderColor="border">
                                     {hashtags.map((tag, index) => (
                                         <WrapItem key={index}>
                                             <Tag
@@ -604,21 +613,21 @@ const Editor: FC<EditorProps> = ({ markdown, setMarkdown, title, setTitle, hasht
                         flex={viewMode === 'split' ? 1 : 'auto'}
                         h="100%"
                         border="1px solid"
-                        borderColor="gray.200"
+                        borderColor="border"
                         borderRadius="md"
                         display="flex"
                         flexDirection="column"
-                        bg="white"
+                        bg="muted"
                     >
                         <Box 
-                            bg="gray.50" 
+                            bg="muted" 
                             px={3} 
                             py={2} 
                             borderBottom="1px solid" 
-                            borderColor="gray.200"
+                            borderColor="border"
                             fontSize={title ? "lg" : "sm"}
                             fontWeight={title ? "bold" : "medium"}
-                            color={title ? "gray.900" : "gray.700"}
+                            color="text"
                         >
                             {title || "Preview"}
                         </Box>
@@ -626,6 +635,7 @@ const Editor: FC<EditorProps> = ({ markdown, setMarkdown, title, setTitle, hasht
                             flex={1}
                             p={4}
                             overflowY="auto"
+                            color="text"
                         >
                             {markdown ? (
                                 <PreviewContent markdown={markdown} />

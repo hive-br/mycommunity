@@ -1,6 +1,7 @@
 
 
 import { DefaultRenderer } from "@hiveio/content-renderer";
+import DOMPurify from 'isomorphic-dompurify';
 
 function transformIPFSContent(content: string): string {
     const regex = /<iframe src="https:\/\/ipfs\.skatehive\.app\/ipfs\/([a-zA-Z0-9-?=&]+)"(?:(?!<\/iframe>).)*\sallowfullscreen><\/iframe>/g;
@@ -56,7 +57,7 @@ export default function markdownRenderer(markdown: string) {
     const renderer = new DefaultRenderer({
         baseUrl: "https://hive.blog/",
         breaks: true,
-        skipSanitization: true, // Allow HTML tags like <u>, <ins> for formatting
+        skipSanitization: false, // Enable sanitization for security
         allowInsecureScriptTags: false,
         addNofollowToLinks: true,
         doNotShowImages: false,
@@ -93,5 +94,41 @@ export default function markdownRenderer(markdown: string) {
     // Convert Hive frontend URLs to internal links
     safeHtmlStr = convertHiveUrlsToInternal(safeHtmlStr);
 
-    return  safeHtmlStr
+    // Sanitize with DOMPurify to prevent XSS attacks
+    // Configure DOMPurify to allow safe HTML tags while blocking dangerous ones
+    const cleanHtml = DOMPurify.sanitize(safeHtmlStr, {
+        ALLOWED_TAGS: [
+            // Text formatting
+            'p', 'br', 'span', 'div', 'blockquote', 'pre', 'code',
+            'strong', 'em', 'b', 'i', 'u', 'ins', 'del', 's', 'strike',
+            'mark', 'sub', 'sup', 'small',
+            // Headings
+            'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+            // Lists
+            'ul', 'ol', 'li', 'dl', 'dt', 'dd',
+            // Tables
+            'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'col', 'colgroup',
+            // Links and media
+            'a', 'img', 'video', 'source', 'audio',
+            // Other safe elements
+            'hr', 'center', 'details', 'summary'
+        ],
+        ALLOWED_ATTR: [
+            'href', 'src', 'alt', 'title', 'width', 'height',
+            'class', 'id', 'style', 'target', 'rel',
+            'controls', 'muted', 'preload', 'loading', 'autoplay', 'loop',
+            'type', 'allowfullscreen', 'frameborder',
+            'colspan', 'rowspan', 'align', 'valign',
+            'start', 'reversed'
+        ],
+        ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|ipfs):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+        ALLOW_DATA_ATTR: false,
+        ALLOW_UNKNOWN_PROTOCOLS: false,
+        FORBID_TAGS: ['script', 'style', 'iframe', 'form', 'input', 'button', 'textarea', 'select', 'dialog', 'object', 'embed', 'applet', 'base', 'link', 'meta'],
+        FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onmouseout', 'onmousemove', 'onmouseenter', 'onmouseleave', 'onfocus', 'onblur', 'onchange', 'onsubmit', 'onkeydown', 'onkeyup', 'onkeypress'],
+        KEEP_CONTENT: true,
+        RETURN_TRUSTED_TYPE: false
+    });
+
+    return cleanHtml;
 }

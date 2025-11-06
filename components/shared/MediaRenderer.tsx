@@ -1,6 +1,7 @@
 import { Box, Image } from "@chakra-ui/react";
 import VideoRenderer from "@/components/layout/VideoRenderer";
 import { parseMediaContent, MediaItem } from "@/lib/utils/snapUtils";
+import DOMPurify from 'isomorphic-dompurify';
 
 interface MediaRendererProps {
   mediaContent: string;
@@ -64,11 +65,19 @@ const MediaRenderer = ({ mediaContent }: MediaRendererProps) => {
             '<iframe loading="lazy"'
           );
           
+          // Sanitize iframe content to prevent XSS attacks
+          const sanitizedIframe = DOMPurify.sanitize(lazyIframeContent, {
+            ALLOWED_TAGS: ['iframe'],
+            ALLOWED_ATTR: ['src', 'width', 'height', 'frameborder', 'allowfullscreen', 'loading', 'allow', 'title'],
+            ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?):\/\/(?:www\.)?(?:youtube\.com|youtu\.be|odysee\.com|rumble\.com|vimeo\.com|dailymotion\.com|ipfs\.skatehive\.app|ipfs\.io))/i,
+            ADD_ATTR: ['loading'],
+          });
+          
           return (
             <Box 
               key={index} 
               mb={2}
-              dangerouslySetInnerHTML={{ __html: lazyIframeContent }}
+              dangerouslySetInnerHTML={{ __html: sanitizedIframe }}
               sx={{
                 iframe: {
                   width: "100%",

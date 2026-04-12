@@ -5,6 +5,14 @@ const nextConfig = {
             bodySizeLimit: '10mb', // Increase the body size limit
         },
     },
+    async rewrites() {
+        return [
+            {
+                source: '/api/combflow/:path*',
+                destination: 'https://combflow.net/:path*',
+            },
+        ];
+    },
     webpack: (config, { isServer }) => {
         if (!isServer) {
             config.resolve.fallback = {

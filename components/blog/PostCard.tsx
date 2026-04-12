@@ -1,4 +1,5 @@
-import { Box, Image, Text, Avatar, Flex, Icon, Slider, SliderTrack, SliderFilledTrack, SliderThumb, Button, Link } from '@chakra-ui/react';
+import { Box, Image, Text, Avatar, Flex, Icon, Slider, SliderTrack, SliderFilledTrack, SliderThumb, Button, Link, Tag, Wrap, WrapItem } from '@chakra-ui/react';
+import type { CombflowPost } from '@/lib/combflow/client';
 import React, { useState, useEffect } from 'react';
 import { Discussion } from '@hiveio/dhive';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -13,8 +14,14 @@ import { useRouter } from 'next/navigation';
 import { useCurrencyDisplay } from '@/hooks/useCurrencyDisplay';
 
 interface PostCardProps {
-    post: Discussion;
+    post: Discussion & { combflow?: CombflowPost };
 }
+
+const SENTIMENT_COLOR: Record<string, string> = {
+    positive: 'green',
+    neutral: 'gray',
+    negative: 'red',
+};
 
 export default function PostCard({ post }: PostCardProps) {
     const { title, author, body, json_metadata, created } = post;
@@ -99,16 +106,34 @@ export default function PostCard({ post }: PostCardProps) {
 
             {/* Content Section */}
             <Box display="flex" flexDirection="column" flexGrow={1} cursor="pointer">
-            <Text 
-    fontWeight="bold" 
-    fontSize="lg" 
-    textAlign="left" 
-    onClick={viewPost} 
+            <Text
+    fontWeight="bold"
+    fontSize="lg"
+    textAlign="left"
+    onClick={viewPost}
     mb={2}
     isTruncated
 >
     {title}
 </Text>
+            {post.combflow && (
+                <Wrap mb={2} spacing={1}>
+                    {post.combflow.categories.map((c) => (
+                        <WrapItem key={`cat-${c}`}>
+                            <Tag size="sm" colorScheme="green" variant="subtle">{c}</Tag>
+                        </WrapItem>
+                    ))}
+                    <WrapItem>
+                        <Tag
+                            size="sm"
+                            colorScheme={SENTIMENT_COLOR[post.combflow.sentiment] ?? 'gray'}
+                            variant="outline"
+                        >
+                            {post.combflow.sentiment}
+                        </Tag>
+                    </WrapItem>
+                </Wrap>
+            )}
             {imageUrls.length > 0 && (
                 <Box flex="1" display="flex" alignItems="flex-end" justifyContent="center">
                     <Swiper

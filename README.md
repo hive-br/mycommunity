@@ -189,6 +189,12 @@ Create a `.env.local` file in the root directory with these variables:
 **Default**: Empty (displays as HBD/USD with $ symbol)  
 **Note**: Exchange rates are cached for 6 hours to minimize API calls. HBD is treated as $1 USD when no currency is specified.
 
+#### `NEXT_PUBLIC_ENABLE_COMBFLOW`
+**What it does**: Enables the CombFlow-powered Discovery tab on `/blog` (AI-classified category/language/sentiment filters)
+**Options**: `true` or `false`
+**Default**: `false` (hidden)
+**Example**: `NEXT_PUBLIC_ENABLE_COMBFLOW=true`
+
 #### `HIVE_POSTING_KEY`
 **What it does**: needed for signing the image files to upload to hive.blog
 **Example**: `HIVE_POSTING_KEY=5JxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxQ`  
@@ -316,6 +322,14 @@ export const metadata = {
   description: 'Your community description',
 }
 ```
+
+---
+
+## 🔍 Discovery Tab (CombFlow)
+
+When `NEXT_PUBLIC_ENABLE_COMBFLOW=true`, the `/blog` page shows a **Hive / Discovery** toggle. Discovery mode uses the [CombFlow](https://combflow.net) content discovery API to browse long-form posts filtered by AI-classified **category**, **language**, and **sentiment** — scoped to your community (`NEXT_PUBLIC_HIVE_COMMUNITY_TAG`). Classification badges appear on each card.
+
+CombFlow and its reference frontend [HiveComb](https://hivecomb.net) are built by [@pharesim](https://peakd.com/@pharesim). See the [proposal post](https://peakd.com/hive/@pharesim/combflow-content-discovery-api-and-hivecomb-frontend-dhf-proposal) for background. The API is open — all credit for classification goes to that project.
 
 ---
 

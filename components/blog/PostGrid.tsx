@@ -20,7 +20,7 @@ export default function PostGrid({ posts, columns }: PostGridProps) {
             spacing={4}
         >
             {posts.map((post) => (
-                <PostCard key={post.permlink} post={post} />
+                <PostCard key={`${post.author}/${post.permlink}`} post={post} />
             ))}
         </SimpleGrid>
     );

@@ -120,6 +120,7 @@ Perfect for community managers who want to deploy without touching code!
      NEXT_PUBLIC_HIVE_SEARCH_TAG=hive-123456
      NEXT_PUBLIC_HIVE_USER=yourusername
      HIVE_POSTING_KEY=posting_private_key_here_ //used for uploading images
+     NEXT_PUBLIC_ENABLE_COMBFLOW=false //set to true to enable the Discovery tab on /blog
      ```
 4. Click **Deploy**
 5. Wait 2-3 minutes for the build to complete

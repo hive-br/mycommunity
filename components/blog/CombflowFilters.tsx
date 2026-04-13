@@ -20,6 +20,13 @@ import { useEffect, useState } from 'react';
 import { CategoryNode, getCategories, getLanguages } from '@/lib/combflow/client';
 import { CombflowFilters as Filters } from '@/hooks/useCombflowPosts';
 
+const menuItemStyle = {
+    bg: 'muted',
+    color: 'text',
+    _hover: { bg: 'background' },
+    _focus: { bg: 'background' },
+};
+
 interface Props {
     filters: Filters;
     setFilters: (f: Filters) => void;
@@ -70,6 +77,7 @@ export default function CombflowFilters({ filters, setFilters }: Props) {
                                     <MenuItem
                                         key={child.id}
                                         onClick={() => toggleCategory(child.name)}
+                                        {...menuItemStyle}
                                     >
                                         <Checkbox
                                             isChecked={filters.categories.includes(child.name)}
@@ -91,7 +99,7 @@ export default function CombflowFilters({ filters, setFilters }: Props) {
                     </MenuButton>
                     <MenuList maxH="400px" overflowY="auto" zIndex="popover" bg="muted" color="text" borderColor="border">
                         {languages.map((code) => (
-                            <MenuItem key={code} onClick={() => toggleLanguage(code)}>
+                            <MenuItem key={code} onClick={() => toggleLanguage(code)} {...menuItemStyle}>
                                 <Checkbox
                                     isChecked={filters.languages.includes(code)}
                                     pointerEvents="none"
@@ -108,16 +116,16 @@ export default function CombflowFilters({ filters, setFilters }: Props) {
                         {filters.sentiment ? `Sentiment: ${filters.sentiment}` : 'Sentiment'}
                     </MenuButton>
                     <MenuList zIndex="popover" bg="muted" color="text" borderColor="border">
-                        <MenuItem onClick={() => setFilters({ ...filters, sentiment: undefined })}>
+                        <MenuItem onClick={() => setFilters({ ...filters, sentiment: undefined })} {...menuItemStyle}>
                             Any
                         </MenuItem>
-                        <MenuItem onClick={() => setFilters({ ...filters, sentiment: 'positive' })}>
+                        <MenuItem onClick={() => setFilters({ ...filters, sentiment: 'positive' })} {...menuItemStyle}>
                             Positive
                         </MenuItem>
-                        <MenuItem onClick={() => setFilters({ ...filters, sentiment: 'neutral' })}>
+                        <MenuItem onClick={() => setFilters({ ...filters, sentiment: 'neutral' })} {...menuItemStyle}>
                             Neutral
                         </MenuItem>
-                        <MenuItem onClick={() => setFilters({ ...filters, sentiment: 'negative' })}>
+                        <MenuItem onClick={() => setFilters({ ...filters, sentiment: 'negative' })} {...menuItemStyle}>
                             Negative
                         </MenuItem>
                     </MenuList>
@@ -128,10 +136,10 @@ export default function CombflowFilters({ filters, setFilters }: Props) {
                         {filters.sort === 'oldest' ? 'Oldest' : 'Newest'}
                     </MenuButton>
                     <MenuList zIndex="popover" bg="muted" color="text" borderColor="border">
-                        <MenuItem onClick={() => setFilters({ ...filters, sort: 'newest' })}>
+                        <MenuItem onClick={() => setFilters({ ...filters, sort: 'newest' })} {...menuItemStyle}>
                             Newest
                         </MenuItem>
-                        <MenuItem onClick={() => setFilters({ ...filters, sort: 'oldest' })}>
+                        <MenuItem onClick={() => setFilters({ ...filters, sort: 'oldest' })} {...menuItemStyle}>
                             Oldest
                         </MenuItem>
                     </MenuList>

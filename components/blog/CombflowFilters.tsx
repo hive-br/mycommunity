@@ -63,7 +63,7 @@ export default function CombflowFilters({ filters, setFilters }: Props) {
                     <MenuButton as={Button} leftIcon={<FaFilter />} variant="outline" size="sm">
                         Category
                     </MenuButton>
-                    <MenuList maxH="400px" overflowY="auto" zIndex="popover">
+                    <MenuList maxH="400px" overflowY="auto" zIndex="popover" bg="muted" color="text" borderColor="border">
                         {categories.map((parent) => (
                             <MenuGroup key={parent.id} title={parent.name}>
                                 {(parent.children ?? []).map((child) => (
@@ -89,7 +89,7 @@ export default function CombflowFilters({ filters, setFilters }: Props) {
                     <MenuButton as={Button} leftIcon={<FaLanguage />} variant="outline" size="sm">
                         Language
                     </MenuButton>
-                    <MenuList maxH="400px" overflowY="auto" zIndex="popover">
+                    <MenuList maxH="400px" overflowY="auto" zIndex="popover" bg="muted" color="text" borderColor="border">
                         {languages.map((code) => (
                             <MenuItem key={code} onClick={() => toggleLanguage(code)}>
                                 <Checkbox
@@ -107,7 +107,7 @@ export default function CombflowFilters({ filters, setFilters }: Props) {
                     <MenuButton as={Button} leftIcon={<FaSmile />} variant="outline" size="sm">
                         {filters.sentiment ? `Sentiment: ${filters.sentiment}` : 'Sentiment'}
                     </MenuButton>
-                    <MenuList zIndex="popover">
+                    <MenuList zIndex="popover" bg="muted" color="text" borderColor="border">
                         <MenuItem onClick={() => setFilters({ ...filters, sentiment: undefined })}>
                             Any
                         </MenuItem>
@@ -127,7 +127,7 @@ export default function CombflowFilters({ filters, setFilters }: Props) {
                     <MenuButton as={Button} leftIcon={<FaSort />} variant="outline" size="sm">
                         {filters.sort === 'oldest' ? 'Oldest' : 'Newest'}
                     </MenuButton>
-                    <MenuList zIndex="popover">
+                    <MenuList zIndex="popover" bg="muted" color="text" borderColor="border">
                         <MenuItem onClick={() => setFilters({ ...filters, sort: 'newest' })}>
                             Newest
                         </MenuItem>
